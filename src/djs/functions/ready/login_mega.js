@@ -33,45 +33,66 @@ async function retryWithMaxAttempts(func, maxAttempts) {
   throw lastError; // Throw the last error if all attempts failed
 }
 
+/**
+ * Asynchronously logs in to a Mega.nz account using the provided client, email, and password.
+ *
+ * @param {Object} client - The client object.
+ * @param {string} email - The Mega.nz email.
+ * @param {string} password - The Mega.nz password.
+ *
+ * @returns {Storage} The logged-in Mega.nz account if successful, or throws an error if login fails.
+ */
 async function login_mega(client = theClient, email = mega_email, password = mega_password) {
   try {
+    // Create a new Mega.nz account object & autologin
     const mega = new Storage({ email: email, password: password });
-  
-    try {
-      console.log("Attempting Mega Client Log In")
-      let attempts = 0;
-      let lastError = null;
-      let delay = 1000; // Initial delay in milliseconds
     
-      while (attempts < 3) {
-        try {
-          attempts++;
-          await mega.login()
-          console.log("Mega Client Login successful!");
-          client.connectedToMega = true;
-          client.Mega = mega;
-          return mega;
-        } catch (error) {
-          lastError = error;
-          console.error(`Error during attempt ${attempts}:`, error);
+    // Check if the account is already logged in
+    if (!mega?.getAccountInfo()) {
+      // Account is not logged in, so log in
+      try {
+        console.log("Attempting Mega Client Log In");
+        let attempts = 0;
+        let lastError = null;
+        let delay = 1000; // Initial delay in milliseconds
+    
+        while (attempts < 3) {
+          try {
+            attempts++;
+            mega.login();
+            console.log("Mega Client Login successful!");
+            client.connectedToMega = true;
+            client.Mega = mega;
+            return mega;
+          } catch (error) {
+            lastError = error;
+            console.error(`Error during attempt ${attempts}:`, error);
           
-          // Exponential backoff: Increase delay before the next retry
-          delay *= 2; // You can adjust the multiplier as needed
+            // Exponential backoff: Increase delay before the next retry
+            delay *= 2; // You can adjust the multiplier as needed
           
-          console.log(`Retrying in ${delay} milliseconds...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
+            console.log(`Retrying in ${delay} milliseconds...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+          }
         }
-      }
-      throw lastError; // Throw the last error if all attempts failed
+        throw lastError; // Throw the last error if all attempts failed
       
-    } catch (error) {
-      client.connectedToMega = false;
-      console.error("Error:", error);
+      } catch (error) {
+        client.connectedToMega = false;
+        console.error("Error:", error);
+      }
+    } else {
+      console.log("Mega Client currently logged in!");
+      client.connectedToMega = true;
+      client.Mega = mega;
+      return mega;
     }
   } catch (error) {
     console.error("Error:", error);
+    client.connectedToMega = false;
   }
 }
+
 
 
 module.exports = {
