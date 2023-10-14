@@ -1,11 +1,7 @@
 const createEmb = require("../create/createEmbed.js");
 const scripts = require("../scripts/scripts.js");
 const createBtn = require("../create/createButton.js");
-const {
-  EmbedBuilder,
-  AttachmentBuilder,
-} = require("discord.js");
-
+const { EmbedBuilder, AttachmentBuilder } = require("discord.js");
 
 module.exports = {
   throwErrorReply,
@@ -13,7 +9,6 @@ module.exports = {
   getInteractionObj,
   getMemberInfoObj,
   getCommands,
-  krakenWebScraper,
   extractID,
   errEmbed,
   getOnlineCount,
@@ -29,14 +24,10 @@ module.exports = {
   getMemberCount,
   getServerInfoObj,
   getAlertEmoji,
-  krakenFileSizeFinder,
-  krakenTitleFinder,
   createAttachment,
-  krakenFileTypeFinder,
   discordJsCharMax,
+  throwNewError,
 };
-
-
 
 const discordJsCharMax = {
   embed: {
@@ -52,312 +43,120 @@ const discordJsCharMax = {
     author: {
       name: 256,
     },
-  }
-}
+  },
+};
 
-function extractM4Aurl(str) {
-  let res = str.match(/m4a:(.*)/);
-
-  return res && res[1];
-}
-
-async function throwNewError(
-  action = action && typeof action === "string" ? action : null,
-  interaction,
-  err,
-  i
-) {
+/**
+ * Function to handle and report errors in interactions.
+ *
+ * @param {string} action - The action that was being performed when the error occurred.
+ * @param {DiscordInteraction} interaction - The Discord interaction where the error occurred.
+ * @param {Error} err - The error that occurred.
+ * @param {DiscordInteraction} i - (Optional) An alternative interaction to report the error (used in certain cases).
+ */
+async function throwNewError(action, interaction, err, i) {
   try {
+    const errorEmbed = createEmb.createEmbed({
+      title: "❗️ There was an Error, Share the Error with the Developer",
+      description: `__While:__ \`${
+        action ?? "?"
+      }\`\n\`\`\`js\n${err}\n\`\`\`\nError Report Summary:\n\`\`\`js\nusername: ${
+        interaction.member.user.username
+      }\nID: ${interaction.member.user.id}\nGuild: ${
+        interaction.guild.name
+      }\nGuild ID: ${interaction.guild.id}\nChannel: ${
+        interaction.channel.name
+      }\nChannel ID: ${interaction.channel.id}\nMessage ID: ${
+        interaction.message?.id ?? "N/A"
+      }\nButton ID: ${interaction.customID ?? "N/A"}\n\`\`\``,
+      color: scripts.getErrorColor(),
+      footer: {
+        text: "Contact The Developer and Send the Error",
+        iconURL: interaction.user.avatarURL(),
+      },
+    });
+
     await interaction.editReply({
-      embeds: [
-        createEmb.createEmbed({
-          title: "❗️ There was an Error , Share the Error w the Developer",
-          description:
-            `__While :__ \`${action !== null ? action : "?"}\`\n` +
-            "```js\n" +
-            err +
-            "\n```\n" +
-            `Error Report Summary:` +
-            "\n```js\n" +
-            `username: ${interaction.member.user.username}\nID: ${interaction.member.user.id}\nGuild: ${interaction.guild.name}\nGuild ID: ${interaction.guild.id}\nChannel: ${interaction.channel.name}\nChannel ID: ${interaction.channel.id}\nMessage ID: ${interaction.message.id}\nButton ID: ${interaction.customID}` +
-            "\n```",
-          color: scripts.getErrorColor(),
-          footer: {
-            text: "Contact STEVE JOBS and Send the Error",
-            iconURL: interaction.user.avatarURL(),
-          },
-        }),
-      ],
+      embeds: [errorEmbed],
     });
   } catch (error) {
     if (i) {
       try {
+        const errorEmbedAlt = createEmb.createEmbed({
+          title: "There was an Error, Share the Error with the Developer",
+          description: `\`\`\`js\n${err}\n\`\`\`\nError Report Summary:\n\`\`\`js\nusername: ${
+            i.member.user.username
+          }\nID: ${i.member.user.id}\nGuild: ${i.guild.name}\nGuild ID: ${
+            i.guild.id
+          }\nChannel: ${i.channel.name}\nChannel ID: ${
+            i.channel.id
+          }\nMessage ID: ${i.message?.id ?? "N/A"}\nButton ID: ${
+            i.customID ?? "N/A"
+          }\n\`\`\``,
+          color: scripts.getErrorColor(),
+          footer: {
+            text: "Contact The Developer and Send the Error",
+            iconURL: i.user.avatarURL(),
+          },
+        });
+
         await i.editReply({
-          embeds: [
-            createEmb.createEmbed({
-              title: "There was an Error , Share the Error w the Developer",
-              description:
-                "```js\n" +
-                err +
-                "\n```\n" +
-                `Error Report Summary:` +
-                "\n```js\n" +
-                `username: ${i.member.user.username}\nID: ${i.member.user.id}\nGuild: ${i.guild.name}\nGuild ID: ${i.guild.id}\nChannel: ${i.channel.name}\nChannel ID: ${i.channel.id}\nMessage ID: ${i.message.id}\nButton ID: ${i.customID}` +
-                "\n```",
-              color: scripts.getErrorColor(),
-              footer: {
-                text: "Contact STEVE JOBS and Send the Error",
-                iconURL: i.user.avatarURL(),
-              },
-            }),
-          ],
+          embeds: [errorEmbedAlt],
         });
       } catch (errr) {
         console.log(
-          `error occurred when trying to send the user this-> Error: ${err}\n\n\nThe error that occurred when trying to send the user the 2nd time -> error is: ${error}\n\n\nThe error that occurred when trying to send the user the 3rd time -> error is: ${errr}`
+          `An error occurred when trying to send the user the error: ${err}\n\nAn error occurred when trying to send the user the error the second time: ${error}\n\nAn error occurred when trying to send the user the error the third time: ${errr}`
         );
       }
     } else {
+      const errorEmbedDefault = createEmb.createEmbed({
+        title: "There was an Error, Share the Error with the Developer",
+        description: `${
+          interaction.commandName
+            ? `Command: \`${interaction.commandName}\`\n`
+            : ""
+        }\`\`\`js\n${err}\n\`\`\`Error occurred for admin user:\n\`\`\`js\nusername: ${
+          interaction.member.user.username
+        }\nID: ${interaction.member.user.id}\nGuild: ${
+          interaction.guild.name
+        }\nGuild ID: ${interaction.guild.id}\nChannel: ${
+          interaction.channel.name
+        }\nChannel ID: ${interaction.channel.id}${
+          interaction.message ? `\nMessage ID: ${interaction.message.id}` : ""
+        }${
+          interaction.customID ? `\nCustom ID: ${interaction.customID}` : ""
+        }\n\`\`\``,
+        color: scripts.getErrorColor(),
+        footer: {
+          text: "Contact The Developer and Send the Error",
+          iconURL: interaction.user.avatarURL(),
+        },
+      });
+
       await interaction.editReply({
-        embeds: [
-          createEmb.createEmbed({
-            title: "There was an Error, Share the Error w the Developer",
-            description:
-              `${
-                interaction.commandName
-                  ? `Command: \`${interaction.commandName}\`\n`
-                  : ""
-              }` +
-              "```js\n" +
-              err +
-              "\n```\n" +
-              `Error occurred for admin user:` +
-              "\n```js\n" +
-              `username: ${interaction.member.user.username}\nID: ${
-                interaction.member.user.id
-              }\nGuild: ${interaction.guild.name}\nGuild ID: ${
-                interaction.guild.id
-              }\nChannel: ${interaction.channel.name}\nChannel ID: ${
-                interaction.channel.id
-              }${
-                interaction.message
-                  ? `\nMessage ID: ${interaction.message.id}`
-                  : ""
-              }${
-                interaction.customID
-                  ? `\nCustom ID: ${interaction.customID}`
-                  : ""
-              }` +
-              "\n```",
-            color: scripts.getErrorColor(),
-            footer: {
-              text: "Contact STEVE JOBS and Send the Error",
-              iconURL: interaction.user.avatarURL(),
-            },
-          }),
-        ],
+        embeds: [errorEmbedDefault],
       });
     }
   }
 }
 
+/**
+ * Create an attachment using an attachment object.
+ *
+ * @param {Attachment} attachment - The attachment object with filename and URL.
+ * @returns {AttachmentBuilder} An instance of AttachmentBuilder.
+ */
 function createAttachment(attachment) {
   return new AttachmentBuilder()
-.setName(attachment.filename)
-.setFile(attachment.url)
-// , interaction.setDescription(attachment.description)
+    .setName(attachment.filename)
+    .setFile(attachment.url);
 }
 
-
-async function getZIP(parsedData, interaction){
-  const capturedValues = parsedData.match(/<(?=form|input).+/g).flatMap(str => str.match(/(?<=["'])[\/\w]+(?=["'])/g));
-  // await interaction.channel.send({content: `<@873576476136575006>`, embeds: [createEmb.createEmbed({title: `The Captured Values are:`, description: `capturedValues[0].match(/(?<=\/)\w+$/):\`\`\`js\n${capturedValues[0].match(/(?<=\/)\w+$/)}\n\`\`\`\n\ncapturedValues[0:\`\`\`js\n${capturedValues[0]}\n\`\`\``, color: `#00ff00`})]
-  // });
-  let theURL = (await (await fetch(`https://krakenfiles.com${capturedValues[0]}`, {
-    method: capturedValues[1],
-    headers: {
-        "accept": "*/*",
-        "accept-encoding": "gzip, deflate, br",
-        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
-        "hash": capturedValues[0].match(/(?<=\/)\w+$/).toString()
-    },
-    body: `${capturedValues[3]}=${capturedValues[4]}`
-})).json()).url;
-console.log(`theURL`, theURL)
-
-  return theURL;
-
-}
-async function krakenZipFinder(url, interaction) {
-  
- let data;
-  try {
-    data = await (await fetch(url)).text();
-    // await interaction.channel.send({content: `<@873576476136575006>\n\n\`\`\`js\n${data}\n\`\`\``, embeds: [createEmb.createEmbed({title: `The HTML FIle:`, color: `Yellow`})
-   // ]});
-   scripts.cLog(data)
-  } catch (error) {
-    console.log(`there is no data to scrape at this url: ${url}`)
-    console.log(`error`, error)
-    return;
-  }
-  let zip;
-  try {
-    zip = await getZIP(data, interaction)
-  
-    console.log(`the Zip file`, zip)
-  
-    return zip
-  } catch (error) {
-    await throwNewError("scraping kraken zip file", interaction, error)
-  }
-
-}
-
-async function krakenFileSizeFinder(url, interaction){
-  if (typeof url !== 'string') return;
-
-  let data;
-  try {
-    data = await (await fetch(url)).text();
-  } catch (error) {
-    await throwNewError(`there is no data to scrape at this url: ${url}`, interaction, error)
-    return;
-  }
-  const regex = /<div class="sub-text">File size<\/div>\n\s*<div class="lead-text">(.+)<\/div>/;
-const match = data.match(regex);
-let fileSize = 0;
-if (match) {
-fileSize = match[1];
-console.log(fileSize);
-} else {
-try {
-throw new Error('Could not find kraken file size');
-} catch (error) {
-await throwNewError("scraping kraken file size", interaction, error)
-
-}
-}
-  return fileSize;
-};
-
-async function krakenFileTypeFinder(url, interaction){
-  if (typeof url !== 'string' || url.includes('cdn.discordapp.com')) return;
-  console.log(`the url passed in`, url)
-  let data;
-  try {
-    data = await (await fetch(url)).text();
-  } catch (error) {
-    await throwNewError(`there is no data to scrape at this url: ${url}`, interaction, error)
-    return;
-  }
-  const regex = /<div class="sub-text">Type<\/div>\n\s*<div class="lead-text">(.+)<\/div>/;
-const match = data.match(regex);
-let type;
-if (match) {
-  type = match[1];
-console.log(type);
-} else {
-try {
-throw new Error('Could not find kraken file type');
-} catch (error) {
-await throwNewError("file type retrieval", interaction, error)
-
-}
-}
-  return type;
-};
-
-async function krakenFileIsZip(url, interaction){
-  if (typeof url !== 'string') return;
-
-  let data;
-  try {
-    data = await (await fetch(url)).text();
-  } catch (error) {
-    await throwNewError(`there is no data to scrape at this url: ${url}`, interaction, error)
-    return;
-  }
-  const regex = /<div class="sub-text">Type<\/div>\n\s*<div class="lead-text">(.+)<\/div>/;
-const match = data.match(regex);
-let type;
-if (match) {
-  type = match[1];
-console.log(type);
-} else {
-try {
-throw new Error('Could not find kraken file type');
-} catch (error) {
-await throwNewError("file type retrieval", interaction, error)
-
-}
-}
-  return type;
-};
-
-async function krakenTitleFinder(url, interaction){
-  if (typeof url !== 'string') return;
-
-  let data;
-  try {
-    data = await (await fetch(url)).text();
-  } catch (error) {
-    console.log(`there is no data to scrape at this url: ${url}`)
-    console.log(`error`, error)
-    return;
-  }
-
-try {
-    const titleLine = data.split("\n").filter((line) => line.includes(`<meta property="og:title" content=`))[0];
-    const matches = titleLine.match(/content="(.*)"/);
-    const fileName = matches[1];
-  
-    return fileName;
-} catch (error) {
-  await throwNewError(`there is no data to scrape at this url: ${url}`, interaction, error)
-  
-}
-
-};
-
-async function krakenWebScraper(url, batch_id, interaction){
-  if (typeof url !== 'string') return;
-
-  let data;
-  try {
-    data = await (await fetch(url)).text();
-  } catch (error) {
-    console.log(`there is no data to scrape at this url: ${url}`)
-    console.log(`error`, error)
-    return;
-  }
-  let fileName;
-  let type = await krakenFileTypeFinder(url, interaction);
-  let x;
-  if (type === 'mp3') {
-    
-    const tempLine = data.split("\n").filter((line) => line.includes("m4a:"))[0];
-    const titleLine = data.split("\n").filter((line) => line.includes(`<meta property="og:title" content=`))[0];
-    const matches = titleLine.match(/content="(.*)"/);
-    fileName = matches[1];
-  console.log(`the url line`, tempLine);
-  x = extractM4Aurl(tempLine);
-  x = x.replace(/'/g, '').replace('//', '');
-  // replace all spaces inthe string
-  x = x.replace(/ /g, '');
-  x= `https://` + x;
-  } else if (type === 'zip') {
-    fileName = await krakenTitleFinder(url, interaction);
-    x = await krakenZipFinder(url, interaction)
-    //x= url;
-  }
-saveKrakenBatch(x, fileName, url, batch_id, interaction)
-
-  return x;
-};
-
-
-
+/**
+ * Get a random alert emoji from a predefined list.
+ *
+ * @returns {string} A randomly selected alert emoji.
+ */
 let getAlertEmoji = () => {
   let alertEmojis = [
     `🫵🏿`,
@@ -386,7 +185,7 @@ let getAlertEmoji = () => {
  */
 function getMemberInfoObj(member) {
   let obj;
-  // check to make sure the member is an object
+  // Check to make sure the member is an object
   if (typeof member !== "object") {
     try {
       throw new Error("The member is not an object");
@@ -396,24 +195,24 @@ function getMemberInfoObj(member) {
   } else {
     try {
       obj = {
-        // get the user name of the user who triggered the interaction
+        // Get the user name of the user who triggered the interaction
         name: `${member.user.username}`,
         displayName: `${member.displayName}`,
-        // get the user id of the user who triggered the interaction
+        // Get the user id of the user who triggered the interaction
         userId: `${member.user.id}`,
-        // get the user avatar of the user who triggered the interaction
+        // Get the user avatar of the user who triggered the interaction
         avatar: `${member.user.avatarURL()}`,
-        // get the user role of the user who triggered the interaction
+        // Get the user role of the user who triggered the interaction
         role: `${member.roles.highest.name}`,
-        // get the date the user joined the server
+        // Get the date the user joined the server
         joined: `${member.joinedAt}`,
-        // get the date the user joined discord
+        // Get the date the user joined Discord
         created: `${member.user.createdAt}`,
-        // get the number of times the user has been kicked
+        // Get the number of times the user has been kicked
         kicks: `${member.user.kicks === undefined ? 0 : member.user.kicks}`,
-        // get the number of times the user has been banned
+        // Get the number of times the user has been banned
         bans: `${member.user.bans === undefined ? 0 : member.user.bans}`,
-        // get the number of times the user has been warned
+        // Get the number of times the user has been warned
         warns: `${member.user.warns === undefined ? 0 : member.user.warns}`,
       };
       return obj;
@@ -457,16 +256,16 @@ function getCommands(client, exclude = []) {
 }
 
 /**
- * Returns an object with information about the interaction
+ * Returns an object with information about the interaction.
  *
- * @param {Object} interaction - The interaction object from which to get the information
+ * @param {Object} interaction - The interaction object from which to get the information.
  *
- * @returns {Object} An object with information about the interaction
+ * @returns {Object} An object with information about the interaction.
  *
- * @throws {Error} If there is an error getting the information or if the interaction is not an object
+ * @throws {Error} If there is an error getting the information or if the interaction is not an object.
  */
 function getInteractionObj(interaction) {
-  // check to make sure the interaction is an object
+  // Check to make sure the interaction is an object.
   if (typeof interaction !== "object") {
     try {
       throw new Error("The interaction is not an object");
@@ -483,18 +282,18 @@ function getInteractionObj(interaction) {
         member: `${interaction.member}`, // ex: <@975944168373370940> (user id) not an object
         memberPerms: `${interaction.member.permissions}`, // ex:
         userInfo: {
-          // get the user name of the user who triggered the interaction
+          // Get the user name of the user who triggered the interaction.
           name: `${interaction.member.user.username}`,
           displayName: `${interaction.member.displayName}`,
-          // get the user id of the user who triggered the interaction
+          // Get the user id of the user who triggered the interaction.
           userId: `${interaction.member.user.id}`,
-          // get the user avatar of the user who triggered the interaction
+          // Get the user avatar of the user who triggered the interaction.
           avatar: `${interaction.member.user.avatarURL()}`,
-          // get the user role of the user who triggered the interaction
+          // Get the user role of the user who triggered the interaction.
           role: `${interaction.member.roles.highest.name}`,
-          // get the user role id of the user who triggered the interaction
+          // Get the user role id of the user who triggered the interaction.
           roleID: `${interaction.member.roles.highest.id}`,
-          // get the array of roles the user who triggered the interaction has
+          // Get the array of roles the user who triggered the interaction has.
           roles: interaction.member.roles,
         },
       };
@@ -505,24 +304,47 @@ function getInteractionObj(interaction) {
   }
 }
 
+/**
+ * Extracts an ID from a string that contains a "#" symbol.
+ *
+ * @param {string} str - The input string to extract the ID from.
+ *
+ * @returns {string | undefined} The extracted ID or undefined if the input is invalid.
+ *
+ * @throws {Error} If the input string does not contain a "#" symbol.
+ */
 function extractID(str) {
+  // Check if the input string is undefined.
   if (str === undefined) return;
+
   console.log(`THE STRING:`, str);
+
+  // Check if the input string contains a "#" symbol.
   if (str.includes("#")) {
+    // Split the string at "#" and get the second part as the ID.
     let id = `#${str.split("#")[1]}`;
     return id;
   } else {
     try {
+      // Throw an error if the string does not contain a "#" symbol.
       throw new Error("The string does not contain a #");
     } catch (error) {
+      // Log the error using the logError function.
       scripts.logError(error, str);
     }
   }
 }
 
-// // Buttons
-
+/**
+ * Create a link-style button with a label and URL.
+ *
+ * @param {string} label - The label or text displayed on the button.
+ * @param {string} url - The URL that the button links to.
+ *
+ * @returns {Object} A button object with link style.
+ */
 const linkButton = (label, url) => {
+  // Create a button using the createButton function.
   let button = createBtn.createButton({
     link: url,
     label: label,
@@ -531,6 +353,11 @@ const linkButton = (label, url) => {
   return button;
 };
 
+/**
+ * Create an error embed with a specific format.
+ *
+ * @returns {Object} An embed object with error information.
+ */
 let errEmbed = () => {
   return new EmbedBuilder()
     .setColor("#FF0000")
@@ -538,153 +365,255 @@ let errEmbed = () => {
     .setDescription("Invalid properties were given to create the embed");
 };
 
-let errMessage = () => {
-  return { embeds: [errEmbed()] };
-};
-
+/**
+ * Get the count of online members in the server.
+ *
+ * @param {Object} interaction - The interaction object to access the server information.
+ * @returns {number} The count of online members.
+ */
 let getOnlineCount = async (interaction) => {
   let onlineCount = 0;
 
+  // Fetch all members in the guild
   const cache = await interaction.guild.members.fetch();
-  let fetchedMembers = cache.filter(ctx.presence?.status === "online");
+  // Filter the fetched members to count those with 'online' status
+  let fetchedMembers = cache.filter(
+    (member) => member.presence?.status === "online"
+  );
   onlineCount = fetchedMembers.size;
   return onlineCount;
 };
 
+/**
+ * Get the count of offline members in the server.
+ *
+ * @param {Object} interaction - The interaction object to access the server information.
+ * @returns {number} The count of offline members.
+ */
 let getOfflineCount = (interaction) => {
   let offlineCount = 0;
+
+  // Fetch all members with presences
   interaction.guild.members
     .fetch({ withPresences: true })
     .then((fetchedMembers) => {
+      // Filter the fetched members to count those with 'offline' status
       const totalOffline = fetchedMembers.filter(
         (member) => member.presence?.status === "offline"
       );
       offlineCount = totalOffline.size;
-      // Now you have a collection with all online member objects in the totalOnline variable
     });
+
   return offlineCount;
 };
 
+/**
+ * Get the count of members with 'idle' status in the server.
+ *
+ * @param {Object} interaction - The interaction object to access the server information.
+ * @returns {number} The count of members with 'idle' status.
+ */
 let getIdleCount = (interaction) => {
   let idleCount = 0;
+
+  // Fetch all members with presences
   interaction.guild.members
     .fetch({ withPresences: true })
     .then((fetchedMembers) => {
+      // Filter the fetched members to count those with 'idle' status
       const totalIdle = fetchedMembers.filter(
         (member) => member.presence?.status === "idle"
       );
       idleCount = totalIdle.size;
-      // Now you have a collection with all online member objects in the totalOnline variable
     });
+
   return idleCount;
 };
 
+/**
+ * Get the count of members with 'dnd' (Do Not Disturb) status in the server.
+ *
+ * @param {Object} interaction - The interaction object to access the server information.
+ * @returns {number} The count of members with 'dnd' status.
+ */
 let getDndCount = (interaction) => {
   let dndCount = 0;
+
+  // Fetch all members with presences
   interaction.guild.members
     .fetch({ withPresences: true })
     .then((fetchedMembers) => {
+      // Filter the fetched members to count those with 'dnd' status
       const totalDnd = fetchedMembers.filter(
         (member) => member.presence?.status === "dnd"
       );
       dndCount = totalDnd.size;
-      // Now you have a collection with all online member objects in the totalOnline variable
     });
+
   return dndCount;
 };
 
+/**
+ * Get the count of bot members in the server.
+ *
+ * @param {Object} interaction - The interaction object to access the server information.
+ * @returns {number} The count of bot members.
+ */
 let getBotCount = (interaction) => {
   let botCount = 0;
+
+  // Fetch all members with presences
   interaction.guild.members
     .fetch({ withPresences: true })
     .then((fetchedMembers) => {
+      // Filter the fetched members to count those that are bots
       const totalBots = fetchedMembers.filter((member) => member.user.bot);
       botCount = totalBots.size;
-      // Now you have a collection with all online member objects in the totalOnline variable
     });
+
   return botCount;
 };
 
+/**
+ * Get the count of human members in the server.
+ *
+ * @param {Object} interaction - The interaction object to access the server information.
+ * @returns {number} The count of human members.
+ */
 let getHumanCount = (interaction) => {
   let humanCount = 0;
+
+  // Fetch all members with presences
   interaction.guild.members
     .fetch({ withPresences: true })
     .then((fetchedMembers) => {
+      // Filter the fetched members to count those that are not bots
       const totalHumans = fetchedMembers.filter((member) => !member.user.bot);
       humanCount = totalHumans.size;
-      // Now you have a collection with all online member objects in the totalOnline variable
     });
+
   return humanCount;
 };
 
+/**
+ * Get the count of online human members in the server.
+ *
+ * @param {Object} interaction - The interaction object to access the server information.
+ * @returns {number} The count of online human members.
+ */
 let getOnlineHumans = (interaction) => {
   let onlineHumans = 0;
+
+  // Fetch all members with presences
   interaction.guild.members
     .fetch({ withPresences: true })
     .then((fetchedMembers) => {
+      // Filter the fetched members to count those that are online and not bots
       const totalOnlineHumans = fetchedMembers.filter(
         (member) => member.presence?.status === "online" && !member.user.bot
       );
       onlineHumans = totalOnlineHumans.size;
-      // Now you have a collection with all online member objects in the totalOnline variable
     });
+
   return onlineHumans;
 };
 
+/**
+ * Get the count of online bot members in the server.
+ *
+ * @param {Object} interaction - The interaction object to access the server information.
+ * @returns {number} The count of online bot members.
+ */
 let getOnlineBots = (interaction) => {
   let onlineBots = 0;
+
+  // Fetch all members with presences
   interaction.guild.members
     .fetch({ withPresences: true })
     .then((fetchedMembers) => {
+      // Filter the fetched members to count those that are online and are bots
       const totalOnlineBots = fetchedMembers.filter(
         (member) => member.presence?.status === "online" && member.user.bot
       );
       onlineBots = totalOnlineBots.size;
-      // Now you have a collection with all online member objects in the totalOnline variable
     });
+
   return onlineBots;
 };
 
+/**
+ * Get the count of offline human members in the server.
+ *
+ * @param {Object} interaction - The interaction object to access the server information.
+ * @returns {number} The count of offline human members.
+ */
 let getOfflineHumans = (interaction) => {
   let offlineHumans = 0;
+
+  // Fetch all members with presences
   interaction.guild.members
     .fetch({ withPresences: true })
     .then((fetchedMembers) => {
+      // Filter the fetched members to count those that are offline and not bots
       const totalOfflineHumans = fetchedMembers.filter(
         (member) => member.presence?.status === "offline" && !member.user.bot
       );
       offlineHumans = totalOfflineHumans.size;
-      // Now you have a collection with all online member objects in the totalOnline variable
     });
+
   return offlineHumans;
 };
 
+/**
+ * Get the count of offline bot members in the server.
+ *
+ * @param {Object} interaction - The interaction object to access the server information.
+ * @returns {number} The count of offline bot members.
+ */
 let getOfflineBots = (interaction) => {
   let offlineBots = 0;
+
+  // Fetch all members with presences
   interaction.guild.members
     .fetch({ withPresences: true })
     .then((fetchedMembers) => {
+      // Filter the fetched members to count those that are offline and are bots
       const totalOfflineBots = fetchedMembers.filter(
         (member) => member.presence?.status === "offline" && member.user.bot
       );
       offlineBots = totalOfflineBots.size;
-      // Now you have a collection with all online member objects in the totalOnline variable
     });
+
   return offlineBots;
 };
 
+/**
+ * Get the count of all non-bot members in the server.
+ *
+ * @param {Object} interaction - The interaction object to access the server information.
+ * @returns {number} The count of non-bot members.
+ */
 let getMemberCount = (interaction) => {
   let memberCount = 0;
+
+  // Fetch all members with presences
   interaction.guild.members
     .fetch({ withPresences: true })
     .then((fetchedMembers) => {
+      // Filter the fetched members to count those that are not bots
       const totalMembers = fetchedMembers.filter((member) => !member.user.bot);
       memberCount = totalMembers.size;
-      // Now you have a collection with all online member objects in the totalOnline variable
     });
+
   return memberCount;
 };
 
+/**
+ * Get server information as an object, including member counts and status counts.
+ *
+ * @param {Object} interaction - The interaction object to access server information.
+ * @returns {Object} An object containing various server-related counts.
+ */
 let getServerInfoObj = (interaction) => {
   let serverInfoObj = {
     onlineCount: getOnlineCount(interaction),
@@ -703,8 +632,12 @@ let getServerInfoObj = (interaction) => {
   return serverInfoObj;
 };
 
-let getRandID = () =>
-{ 
+/**
+ * Generate a random ID based on the current date and time.
+ *
+ * @returns {string} A unique random ID.
+ */
+let getRandID = () => {
   let randID = "";
   let date = new Date();
   let year = date.getFullYear();
@@ -714,30 +647,36 @@ let getRandID = () =>
   let minute = date.getMinutes();
   let second = date.getSeconds();
   let millisecond = date.getMilliseconds();
-  randID = `#${Math.floor(Math.random() * 999) + 999}${year}${month}${day}${hour}${minute}${second}${millisecond}`;
+  randID = `#${
+    Math.floor(Math.random() * 999) + 999
+  }${year}${month}${day}${hour}${minute}${second}${millisecond}`;
   return randID;
-}
+};
 
-async function throwErrorReply(
-  obj
-) {
+/**
+ * Asynchronously handles and replies to errors by sending an error message to the user or channel.
+ *
+ * @param {Object} obj - An object containing relevant information for error handling and reporting.
+ */
+async function throwErrorReply(obj) {
+  let { interaction, error, action, interaction2 } = obj;
 
-  // let obj = {
-  //   interaction: interaction,
-  //   error: error,
-  //   action: action,
-  //   interaction2: interaction2,
-  // }
-  let { interaction, error, action, interaction2, } = obj;
-  if(!interaction || !error) return;
-  console.log('New Error Sent In Server\n\n', error)
+  // Check if essential parameters are provided
+  if (!interaction || !error) return;
+
+  console.log("New Error Sent In Server\n\n", error);
+
   try {
+    // Attempt to edit the reply with an error message embed
     await interaction.editReply({
       embeds: [
         createEmb.createEmbed({
           title: "❗️ There was an Error , Share the Error w the Developer",
           description:
-            `__**While :**__ **\`${action !== null ? action : "? : no action inputted"}\`**\n` +  `${
+            `__**While :**__ **\`${
+              action !== null ? action : "? : no action inputted"
+            }\`**\n` +
+            `${
               interaction.commandName
                 ? `Command: \`${interaction.commandName}\`\n`
                 : ""
@@ -747,12 +686,22 @@ async function throwErrorReply(
             "\n```\n" +
             `Error Report Summary:` +
             "\n```js\n" +
-            `username: ${interaction.member.user.username}\nID: ${interaction.member.user.id}\nGuild: ${interaction.guild.name}\nGuild ID: ${interaction.guild.id}\nChannel Name: ${interaction.channel.name}\nChannel ID: ${interaction.channel.id}\nMessage ID: ${interaction.message.id}\nMessage Content: ${interaction.message.content}\nCustom ID: ${interaction.customId}\nTimestamp: ${new Date()}` +
+            `username: ${interaction.member.user.username}\nID: ${
+              interaction.member.user.id
+            }\nGuild: ${interaction.guild.name}\nGuild ID: ${
+              interaction.guild.id
+            }\nChannel Name: ${interaction.channel.name}\nChannel ID: ${
+              interaction.channel.id
+            }\nMessage ID: ${interaction.message.id}\nMessage Content: ${
+              interaction.message.content
+            }\nCustom ID: ${interaction.customId}\nTimestamp: ${new Date()}` +
             "\n```",
           color: scripts.getErrorColor(),
           footer: {
-            text: "Contact STEVE JOBS and Send the Error",
-            iconURL: interaction.user ? interaction.user.avatarURL() :  interaction.client.user.avatarURL(),
+            text: "Contact The Developer and Send the Error",
+            iconURL: interaction.user
+              ? interaction.user.avatarURL()
+              : interaction.client.user.avatarURL(),
           },
         }),
       ],
@@ -760,12 +709,16 @@ async function throwErrorReply(
   } catch (err) {
     if (interaction2) {
       try {
+        // Attempt to edit the reply with an error message embed, including information about the original error
         await interaction2.editReply({
           embeds: [
             createEmb.createEmbed({
               title: "❗️ There was an Error , Share the Error w the Developer",
               description:
-                `ORIGINAL ERROR\n\n__**While :**__ **\`${action !== null ? action : "? : no action inputted"}\`**\n` +  `${
+                `ORIGINAL ERROR\n\n__**While :**__ **\`${
+                  action !== null ? action : "? : no action inputted"
+                }\`**\n` +
+                `${
                   interaction.commandName
                     ? `Command: \`${interaction.commandName}\`\n`
                     : ""
@@ -775,36 +728,65 @@ async function throwErrorReply(
                 "\n```\n" +
                 `Error Report Summary:` +
                 "\n```js\n" +
-                `username: ${interaction.member.user.username}\nID: ${interaction.member.user.id}\nGuild: ${interaction.guild.name}\nGuild ID: ${interaction.guild.id}\nChannel Name: ${interaction.channel.name}\nChannel ID: ${interaction.channel.id}\nMessage ID: ${interaction.message.id}\nMessage Content: ${interaction.message.content}\nCustom ID: ${interaction.customId}\nTimestamp: ${new Date()}` +
-                "\n```" + `\n\nAdditional ERROR\n\n__**While :**__ **\`sending the original error message\`**\n` +
+                `username: ${interaction.member.user.username}\nID: ${
+                  interaction.member.user.id
+                }\nGuild: ${interaction.guild.name}\nGuild ID: ${
+                  interaction.guild.id
+                }\nChannel Name: ${interaction.channel.name}\nChannel ID: ${
+                  interaction.channel.id
+                }\nMessage ID: ${interaction.message.id}\nMessage Content: ${
+                  interaction.message.content
+                }\nCustom ID: ${
+                  interaction.customId
+                }\nTimestamp: ${new Date()}` +
+                "\n```" +
+                `\n\nAdditional ERROR\n\n__**While :**__ **\`sending the original error message\`**\n` +
                 "```js\n" +
                 err +
                 "\n```\n" +
                 `Error Report Summary:` +
                 "\n```js\n" +
-                `username: ${interaction2.member.user.username}\nID: ${interaction2.member.user.id}\nGuild: ${interaction2.guild.name}\nGuild ID: ${interaction2.guild.id}\nChannel Name: ${interaction2.channel.name}\nChannel ID: ${interaction2.channel.id}\nMessage ID: ${interaction2.message.id}\nMessage Content: ${interaction2.message.content}\nCustom ID: ${interaction2.customId}\nTimestamp: ${new Date()}` +
+                `username: ${interaction2.member.user.username}\nID: ${
+                  interaction2.member.user.id
+                }\nGuild: ${interaction2.guild.name}\nGuild ID: ${
+                  interaction2.guild.id
+                }\nChannel Name: ${interaction2.channel.name}\nChannel ID: ${
+                  interaction2.channel.id
+                }\nMessage ID: ${interaction2.message.id}\nMessage Content: ${
+                  interaction2.message.content
+                }\nCustom ID: ${
+                  interaction2.customId
+                }\nTimestamp: ${new Date()}` +
                 "\n```",
               color: scripts.getErrorColor(),
               footer: {
-                text: "Contact STEVE JOBS and Send the Error",
-                iconURL: interaction.user ? interaction.user.avatarURL() : interaction2.user ? interaction2.user.avatarURL() : interaction.client.user.avatarURL(),
+                text: "Contact The Developer and Send the Error",
+                iconURL: interaction.user
+                  ? interaction.user.avatarURL()
+                  : interaction2.user
+                  ? interaction2.user.avatarURL()
+                  : interaction.client.user.avatarURL(),
               },
             }),
           ],
         });
       } catch (errr) {
         console.log(
-          `error occurred when trying to send the user this-> Error: ${error}\n\n\nThe error that occurred when trying to send the user the 2nd time -> error is: ${err}\n\n\nThe error that occurred when trying to send the user the 3rd time -> error is: ${errr}`
+          `Error occurred when trying to send the user this-> Error: ${error}\n\n\nThe error that occurred when trying to send the user the 2nd time -> error is: ${err}\n\n\nThe error that occurred when trying to send the user the 3rd time -> error is: ${errr}`
         );
       }
     } else {
       try {
+        // If interaction2 is not provided, send the error message to the channel
         await interaction.channel.send({
           embeds: [
             createEmb.createEmbed({
               title: "❗️ There was an Error , Share the Error w the Developer",
               description:
-                `ORIGINAL ERROR\n\n__**While :**__ **\`${action !== null ? action : "? : no action inputted"}\`**\n` +  `${
+                `ORIGINAL ERROR\n\n__**While :**__ **\`${
+                  action !== null ? action : "? : no action inputted"
+                }\`**\n` +
+                `${
                   interaction.commandName
                     ? `Command: \`${interaction.commandName}\`\n`
                     : ""
@@ -814,27 +796,51 @@ async function throwErrorReply(
                 "\n```\n" +
                 `Error Report Summary:` +
                 "\n```js\n" +
-                `username: ${interaction.member.user.username}\nID: ${interaction.member.user.id}\nGuild: ${interaction.guild.name}\nGuild ID: ${interaction.guild.id}\nChannel Name: ${interaction.channel.name}\nChannel ID: ${interaction.channel.id}\nMessage ID: ${interaction.message.id}\nMessage Content: ${interaction.message.content}\nCustom ID: ${interaction.customId}\nTimestamp: ${new Date()}` +
-                "\n```" + `\n\nAdditional ERROR\n\n__**While :**__ **\`sending the original error message\`**\n` +
+                `username: ${interaction.member.user.username}\nID: ${
+                  interaction.member.user.id
+                }\nGuild: ${interaction.guild.name}\nGuild ID: ${
+                  interaction.guild.id
+                }\nChannel Name: ${interaction.channel.name}\nChannel ID: ${
+                  interaction.channel.id
+                }\nMessage ID: ${interaction.message.id}\nMessage Content: ${
+                  interaction.message.content
+                }\nCustom ID: ${
+                  interaction.customId
+                }\nTimestamp: ${new Date()}` +
+                "\n```" +
+                `\n\nAdditional ERROR\n\n__**While :**__ **\`sending the original error message\`**\n` +
                 "```js\n" +
                 err +
                 "\n```\n" +
                 `Error Report Summary:` +
                 "\n```js\n" +
-                `username: ${interaction.member.user.username}\nID: ${interaction.member.user.id}\nGuild: ${interaction.guild.name}\nGuild ID: ${interaction.guild.id}\nChannel Name: ${interaction.channel.name}\nChannel ID: ${interaction.channel.id}\nMessage ID: ${interaction.message.id}\nMessage Content: ${interaction.message.content}\nCustom ID: ${interaction.customId}\nTimestamp: ${new Date()}` +
+                `username: ${interaction.member.user.username}\nID: ${
+                  interaction.member.user.id
+                }\nGuild: ${interaction.guild.name}\nGuild ID: ${
+                  interaction.guild.id
+                }\nChannel Name: ${interaction.channel.name}\nChannel ID: ${
+                  interaction.channel.id
+                }\nMessage ID: ${interaction.message.id}\nMessage Content: ${
+                  interaction.message.content
+                }\nCustom ID: ${
+                  interaction.customId
+                }\nTimestamp: ${new Date()}` +
                 "\n```",
               color: scripts.getErrorColor(),
               footer: {
-                text: "Contact STEVE JOBS and Send the Error",
-                iconURL: interaction.user ? interaction.user.avatarURL() :  interaction.client.user.avatarURL(),
+                text: "Contact the Developer and Send the Error",
+                iconURL: interaction.user
+                  ? interaction.user.avatarURL()
+                  : interaction.client.user.avatarURL(),
               },
             }),
           ],
         });
       } catch (errr) {
-        console.log(`error occurred when trying to send the user this-> Error: ${error}\n\n\nThe error that occurred when trying to send the user the 2nd time -> error is: ${err}\n\n\nThe error that occurred when trying to send the user the 3rd time -> error is: ${errr}`)
+        console.log(
+          `Error occurred when trying to send the user this-> Error: ${error}\n\n\nThe error that occurred when trying to send the user the 2nd time -> error is: ${err}\n\n\nThe error that occurred when trying to send the user the 3rd time -> error is: ${errr}`
+        );
       }
     }
   }
 }
-
