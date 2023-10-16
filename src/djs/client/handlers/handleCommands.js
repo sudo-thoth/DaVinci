@@ -27,9 +27,23 @@ module.exports = async (client, commandFolders, path) => {
     try {
       console.log("Started refreshing application (/) commands.");
       //console.log(`Logged in as ${client.user.tag}!`);
-      await rest.put(Routes.applicationCommands(clientId), {
-        body: client.commandArray,
-      });
+      // for every guild check if the commandStyle is either slash or both or if there is no guildObject found for the guild, then register the commands
+      const guilds = await client.guilds.fetch();
+      for (const guild of guilds) {
+        const guildObject = await client.getServer(guild[1]);
+        if (
+          guildObject.commandStyle === "slash" ||
+          guildObject.commandStyle === "both" ||
+          !guildObject.commandStyle
+        ) {
+          await rest.put(
+            Routes.applicationGuildCommands(clientId, guild[1].id),
+            {
+              body: client.commandArray,
+            }
+          );
+        }
+      }
       console.log("Successfully reloaded application (/) commands.");
       console.log(`Load Commands: ✅`);
     } catch (error) {
