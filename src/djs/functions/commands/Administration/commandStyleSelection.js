@@ -4,6 +4,13 @@ const scripts = require("../../scripts/scripts.js");
 const slashCommandDisabler = require("../../slashCommandControl/slashCommandDisabler.js");
 const slashCommandEnabler = require("../../slashCommandControl/slashCommandEnabler.js");
 
+/**
+ * Selects the command style (slash, prefix, or both) for a server.
+ *
+ * @param {string} style - The desired command style (slash, prefix, or both).
+ * @param {string} type - The type of command (slash or prefix).
+ * @param {Object} trigger - The interaction or message that triggered the command.
+ */
 async function commandStyleSelection(style, type, trigger) {
   // get the guild object to get the current
   const guildObject = await client.getServer(trigger.guild);
