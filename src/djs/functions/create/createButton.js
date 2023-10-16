@@ -1,7 +1,6 @@
 // IMPORTS ...
 const { ButtonBuilder, ButtonStyle } = require("discord.js");
 const scripts = require("../scripts/scripts.js");
-const scripts_mongoDB = require("../scripts/scripts_mongoDB.js");
 
 /**
  * Creates a new row using the provided button object.
