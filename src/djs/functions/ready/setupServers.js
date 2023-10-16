@@ -40,6 +40,7 @@ const mongoose = require("mongoose");
         preferredLocale: guild?.preferredLocale, // The preferred locale of a guild with the "PUBLIC" feature; used in server discovery and notices from Discord; defaults to "en-US"
         premiumProgressBarEnabled: guild?.premiumProgressBarEnabled, //Whether this guild has its premium (boost) progress bar enabled; aka Whether the server widget displays "Server Boost level" messages
         premiumSubscriptionCount: guild?.premiumSubscriptionCount, // The total number of users currently boosting this server
+        commandStyle: "slash", // Default command style is slash, but can be changed to prefix or both
         explicitContentFilter: {
           name:
             guild?.explicitContentFilter === 0
@@ -167,6 +168,8 @@ const mongoose = require("mongoose");
         // update the guildObject with the former permanent bans
         guildObject.permanentBans =
           Array?.from(guildData.permanentBans) || [];
+          // update the guildObject commandStyle property
+          guildObject.commandStyle = guildData.commandStyle;
         let {
           channels,
           bans,
