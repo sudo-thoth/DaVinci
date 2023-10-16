@@ -1,5 +1,6 @@
 const client = require("../../index.js");
 const guildObjectArrayProperties = require("./guildObjectArrayProperties.js");
+const mongoose = require("mongoose");
 
   /**
    * Function to setup every server in the database upon login

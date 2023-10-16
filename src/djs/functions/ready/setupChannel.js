@@ -1,4 +1,5 @@
 const client = require("../../index.js");
+const mongoose = require("mongoose");
 
 /**
  * Sets up a channel in the database.
