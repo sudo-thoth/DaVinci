@@ -89,6 +89,6 @@ const setupChannel = async (channel) => {
     return data;
   }
 };
-  client.setupChannel = setupChannel;
+client.setupChannel = setupChannel;
 
-  module.exports = setupChannel;
+module.exports = setupChannel;
