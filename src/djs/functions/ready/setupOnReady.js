@@ -2,7 +2,7 @@ const setupServers = require("./setupServers");
 const setupUsers = require("./setupUsers");
 const setupChannels = require("./setupChannels");
 const setupLocalDBs = require("./setupLocalDBs");
-const runFunctionEveryXMinutes = require("../../scripts/runFunctionEveryXMinutes");
+const runFunctionEveryXMinutes = require("../scripts/runFunctionEveryXMinutes");
 const checkPermaBans = require("../checks/checkPermaBans.js");
 const checkAutoroles = require("../checks/checkAutoRoles.js");
 
