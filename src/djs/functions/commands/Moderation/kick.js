@@ -66,11 +66,27 @@ async function kick(target, reason, type, trigger) {
             // if the bot can't kick the member, send an error embed
             const errEmbed = createEmbed({
                 title: `Unable to Kick`,
-                description: `❌ You can't take action on <@${target.user.id}> since they have a higher role.`,
+                description: `❌ You can't take action on <@${target.user.id}> since they have a higher role than <@${client.user.id}>.`,
                 color: scripts.getErrorColor(),
             });
             console.log(`Kick Request Denied: ❌`);
             try {
+                return await trigger.reply({ embeds: [errEmbed] });
+            } catch (error) {
+                console.log(error, `Failed Negative Kick Message Attempt`);
+            }
+        }
+
+        // check if the trigger user has a lower role than the target
+        if (trigger.member.roles.highest.position <= target.roles.highest.position) {
+            // if the trigger user has a lower role than the target, send an error embed
+            const errEmbed = createEmbed({
+                title: `Unable to Kick`,
+                description: `❌ You can't take action on <@${target.user.id}> since they have a higher role.`,
+                color: scripts.getErrorColor(),
+            });
+            console.log(`Kick Request Denied: ❌`);
+            try{
                 return await trigger.reply({ embeds: [errEmbed] });
             } catch (error) {
                 console.log(error, `Failed Negative Kick Message Attempt`);
@@ -98,7 +114,7 @@ async function kick(target, reason, type, trigger) {
         // send a success embed
         const embed = createEmbed({
             title: `Kicked!`,
-            description: `✅ Successfully kicked <@${target.user.id}> with reason: ${reason}`,
+            description: `✅ Successfully kicked <@${target.user.id}> with reason: \`${reason}\``,
             color: scripts.getSuccessColor(),
         });
 
@@ -150,7 +166,7 @@ async function kick(target, reason, type, trigger) {
             // if the bot can't kick the member, send an error embed
             const errEmbed = createEmbed({
                 title: `Unable to Kick`,
-                description: `❌ You can't take action on <@${member.user.id}> since they have a higher role.`,
+                description: `❌ You can't take action on <@${member.user.id}> since they have a higher role than <@${client.user.id}>.`,
                 color: scripts.getErrorColor(),
             });
             console.log(`Kick Request Denied: ❌`);
@@ -163,6 +179,32 @@ async function kick(target, reason, type, trigger) {
                     // if the message no longer exists, then send the error embed to the channel
                     return await trigger.channel.send({
                         text: `<@${member.user.id}>`,
+                        embeds: [errEmbed],
+                    });
+                } catch (error) {
+                    console.log(error, `Failed Negative Kick Message Attempt`);
+                }
+            }
+        }
+
+        // check if the trigger user has a lower role than the target
+        if (trigger.member.roles.highest.position <= member.roles.highest.position) {
+            // if the trigger user has a lower role than the target, send an error embed
+            const errEmbed = createEmbed({
+                title: `Unable to Kick`,
+                description: `❌ You can't take action on <@${member.user.id}> since they have a higher role.`,
+                color: scripts.getErrorColor(),
+            });
+            console.log(`Kick Request Denied: ❌`);
+            // reply to the message with the error embed
+            try {
+                return await trigger.reply({ embeds: [errEmbed] });
+            } catch (error) {
+                console.log(error, `Failed Negative Kick Message Attempt`);
+                try {
+                    // if the message no longer exists, then send the error embed to the channel
+                    return await trigger.channel.send({
+                        text: `<@${trigger.user.id}>`,
                         embeds: [errEmbed],
                     });
                 } catch (error) {
@@ -189,7 +231,7 @@ async function kick(target, reason, type, trigger) {
                 try {
                     // if the message no longer exists, then send the error embed to the channel
                     return await trigger.channel.send({
-                        text: `<@${member.user.id}>`,
+                        text: `<@${trigger.user.id}>`,
                         embeds: [errEmbed],
                     });
                 } catch (error) {
@@ -201,7 +243,7 @@ async function kick(target, reason, type, trigger) {
         // send a success embed
         const embed = createEmbed({
             title: `Kicked!`,
-            description: `✅ Successfully kicked <@${member.user.id}> with reason: ${reason}`,
+            description: `✅ Successfully kicked <@${member.user.id}> with reason: \`${reason}\``,
             color: scripts.getSuccessColor(),
         });
 
@@ -212,7 +254,7 @@ async function kick(target, reason, type, trigger) {
             try {
                 // if the message no longer exists, then send the success embed to the channel
                 await trigger.channel.send({
-                    text: `<@${member.user.id}>`,
+                    text: `<@${trigger.user.id}>`,
                     embeds: [embed],
                 });
             } catch (error) {
@@ -222,3 +264,5 @@ async function kick(target, reason, type, trigger) {
         return console.log(`Kick Request Accepted: ✅`);
     }
 }
+
+module.exports = kick;
