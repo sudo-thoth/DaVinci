@@ -91,6 +91,8 @@ widgetEnabled: Boolean, // Whether the server widget is enabled
     {
         channelID: String,
         channelName: String,
+        serverName: String,
+        serverID: String,
         createdAt: String,
         createdTimestamp: Number,
         members: [
