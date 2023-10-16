@@ -3,30 +3,6 @@ const execSync = require("child_process");
 const box = require("cli-box");
 const path = require("path");
 
-// All Functions Contained Within This File
-module.exports = {
-  capLength,
-  scheduleFunction,
-  getDomain,
-  logError,
-  cLog,
-  isDefined,
-  verifyImport,
-  installPackages,
-  getImportStatement,
-  generateColors,
-  getRand,
-  generateHexCode,
-  chalkBox,
-  inBox,
-  getColor,
-  logger,
-  getSuccessColor,
-  getErrorColor,
-  checkForCurseWords,
-  delay,
-};
-
 /**
  * Function to log errors with additional data (if provided).
  *
@@ -537,4 +513,28 @@ const capLength = (chars, max) => {
     return chars.substring(0, max) + "...";
   }
   return chars;
+};
+
+// All Functions Contained Within This File
+module.exports = {
+  capLength,
+  scheduleFunction,
+  getDomain,
+  logError,
+  cLog,
+  isDefined,
+  verifyImport,
+  installPackages,
+  getImportStatement,
+  generateColors,
+  getRand,
+  generateHexCode,
+  chalkBox,
+  inBox,
+  getColor,
+  logger,
+  getSuccessColor,
+  getErrorColor,
+  checkForCurseWords,
+  delay,
 };

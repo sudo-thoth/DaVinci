@@ -3,32 +3,6 @@ const scripts = require("../scripts/scripts.js");
 const createBtn = require("../create/createButton.js");
 const { EmbedBuilder, AttachmentBuilder } = require("discord.js");
 
-module.exports = {
-  throwErrorReply,
-  getRandID,
-  getInteractionObj,
-  getMemberInfoObj,
-  getCommands,
-  extractID,
-  errEmbed,
-  getOnlineCount,
-  getOfflineCount,
-  getIdleCount,
-  getDndCount,
-  getBotCount,
-  getHumanCount,
-  getOnlineHumans,
-  getOnlineBots,
-  getOfflineHumans,
-  getOfflineBots,
-  getMemberCount,
-  getServerInfoObj,
-  getAlertEmoji,
-  createAttachment,
-  discordJsCharMax,
-  throwNewError,
-};
-
 const discordJsCharMax = {
   embed: {
     footer: {
@@ -844,3 +818,29 @@ async function throwErrorReply(obj) {
     }
   }
 }
+
+module.exports = {
+  throwErrorReply,
+  getRandID,
+  getInteractionObj,
+  getMemberInfoObj,
+  getCommands,
+  extractID,
+  errEmbed,
+  getOnlineCount,
+  getOfflineCount,
+  getIdleCount,
+  getDndCount,
+  getBotCount,
+  getHumanCount,
+  getOnlineHumans,
+  getOnlineBots,
+  getOfflineHumans,
+  getOfflineBots,
+  getMemberCount,
+  getServerInfoObj,
+  getAlertEmoji,
+  createAttachment,
+  discordJsCharMax,
+  throwNewError,
+};
