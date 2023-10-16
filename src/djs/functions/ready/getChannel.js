@@ -25,10 +25,8 @@ const getChannel = async (channel) => {
   if (data == null) {
     // if the channel is not found in the db, setup the channel
     data = await setupChannel(channel);
-    return null;
-  } else {
-    return data;
-  }
+  } 
+  return data;
 };
 
 client.getChannel = getChannel;
