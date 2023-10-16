@@ -105,4 +105,4 @@ async function createButton(buttonObj, randID) {
   return button;
 }
 
-module.exports = { createButton };
+module.exports = createButton;

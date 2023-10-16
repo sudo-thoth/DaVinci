@@ -252,4 +252,4 @@ try {
   // console.log(`sending embed`);
   return embed;
 }
-module.exports = { createEmbed };
+module.exports = createEmbed;

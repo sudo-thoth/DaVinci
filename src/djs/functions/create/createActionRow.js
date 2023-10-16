@@ -93,6 +93,6 @@ const {
   }
   
   
-  module.exports = { createActionRow };
+  module.exports = createActionRow;
   
   
