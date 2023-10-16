@@ -1,26 +1,23 @@
-const { Collection } = require("discord.js");
-const onReady = require("../../functions/ready/onReady.js");
+const setupOnReady = require("../../functions/ready/setupOnReady.js");
 
 module.exports = {
   name: "ready",
   once: true,
-  async execute(client) {
-    client.channelsDB = require(`../../../MongoDB/db/schemas/schema_channels.js`);
-    client.usersDB = require(`../../../MongoDB/db/schemas/schema_users.js`);
-    client.guildsDB = require(`../../../MongoDB/db/schemas/schema_guilds.js`);
 
-    // make a local map of guilds with id as key and guild object as value
-    client.localGuilds = new Collection();
-    client.localLog = [];
-    client.localDB = {};
-   
-    try{
-      onReady(client);
+  /**
+   * Executes the ready command.
+   *
+   * @param {Object} client - The Discord client object.
+   */
+  async execute(client) {
+    try {
+      // run the setupOnReady function to set up the bot
+      console.log("Running Setup 🦾");
+      await setupOnReady(client);
     } catch (error) {
       console.log(error);
     }
-
-
+    // log that the bot is ready
     console.log(`Ready! ✅`);
   },
 };
