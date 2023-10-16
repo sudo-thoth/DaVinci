@@ -61,37 +61,6 @@ const mega_password = `${MEGA_PASSWORD}`;
 client.connectedToMega;
 client.commands = new Collection();
 
-// Handle the "ready" event
-client.on("ready", () => {
-  console.log("---------- >> Bot is Online << ----------");
-
-  // Define activity options
-  const activities = [
-    "with art and knowledge",
-    "Leonardo's masterpieces",
-    "DaVinci's wisdom",
-    "Inventions and innovation",
-    "Code like DaVinci",
-    "Unlocking secrets",
-    "Painting the Mona Lisa",
-    "Studying the Vitruvian Man",
-    "Exploring ancient Egypt",
-    "Deciphering the Great Pyramids",
-  ];
-
-  const types = ["PLAYING", "LISTENING", "WATCHING", "STREAMING", "COMPETING"];
-
-  const statuses = ["online", "idle", "dnd", "invisible"];
-
-  // Set random activities and presence status
-  setInterval(() => {
-    const text = activities[Math.floor(Math.random() * activities.length)];
-    const type = types[Math.floor(Math.random() * types.length)];
-    const status = statuses[1];
-    client.user.setPresence({ activities: [{ name: text }], status: status });
-    client.user.setAct;
-  }, 60000);
-});
 
 // Export the client for use in other modules
 module.exports = client;
