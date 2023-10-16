@@ -4,7 +4,7 @@
  * @param {Object} guild - The guild object to retrieve properties for.
  * @returns {Object} - An object containing arrays of properties for the guild.
  */
-const guildObjectArrayProperties = async (guild) => {
+async function guildObjectArrayProperties (guild){
   // construct the channels array
   const channels = [];
   const bans = [];

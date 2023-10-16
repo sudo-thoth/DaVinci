@@ -8,7 +8,7 @@ const mongoose = require("mongoose");
  * @param {Object|string} user - The user object or user ID to set up.
  * @returns {Object} - The data object for the user.
  */
-const setupUser = async (user) => {
+async function setupUser(user) {
   let data;
   // check if user is not obj then fetch user as if user var is user id
   if (!(typeof user === "object") || typeof user === "string") {

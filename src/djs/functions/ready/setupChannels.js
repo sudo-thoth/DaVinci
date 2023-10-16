@@ -6,7 +6,7 @@ const setupChannel = require("./setupChannel.js");
  *
  * @param {Object} client - The Discord client object.
  */
-const setupChannels = async (client) => {
+async function setupChannels(client){
   // get all the channels the bot is in
   const channels = client.channels.cache.map((channel) => channel);
 

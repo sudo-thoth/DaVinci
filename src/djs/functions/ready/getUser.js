@@ -9,7 +9,7 @@ const setupUser = require("./setupUser.js");
  * @returns {Object} - The data object for the user
  * @throws {Error} - If an error occurs while trying to get the data from the database.
  */
-const getUser = async (user) => {
+async function getUser(user) {
   let data;
   // searching users db for the user
   // check if user is not obj then fetch user as if user var is user id

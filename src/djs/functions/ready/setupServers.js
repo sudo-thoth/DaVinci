@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
    * Function to setup every server in the database upon login
    * @param {Object} client - The Discord client object
    */
-  const setupServers = async (client) => {
+  async function setupServers(client) {
     // get all the servers the bot is in
     const guilds = client.guilds.cache.map((guild) => guild);
 

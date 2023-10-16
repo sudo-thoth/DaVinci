@@ -6,7 +6,7 @@ const setupUser = require("./setupUser.js");
  *
  * @param {Object} client - The Discord client object.
  */
-const setupUsers = async (client) => {
+async function setupUsers(client) {
   // get all the users the bot is in
   const users = client.users.cache.map((user) => user);
 

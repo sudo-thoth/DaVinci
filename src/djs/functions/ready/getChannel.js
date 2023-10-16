@@ -8,7 +8,7 @@ const setupChannel = require("./setupChannel.js");
  * @param {Object} channel - The channel object to retrieve data for.
  * @returns {Object|null} - The data object for the channel, or null if the channel was not found in the database.
  */
-const getChannel = async (channel) => {
+async function getChannel (channel){
   let data;
   // searching channels db for the channel
   try {

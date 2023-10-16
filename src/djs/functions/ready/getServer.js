@@ -8,7 +8,7 @@ const setupServer = require("./setupServer.js");
    * @param {Object|string} guild - The guild object or guild ID to retrieve data for.
    * @returns {Object|null} - The data object for the server, or null if the server was not found in the database.
    */
-  const getServer = async (guild) => {
+  async function getServer(guild){
     let data;
     // searching servers db for the server
     // check if guild is not obj then fetch guild as if guild var is guild id

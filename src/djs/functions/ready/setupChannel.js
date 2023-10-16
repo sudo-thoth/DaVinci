@@ -7,7 +7,7 @@ const mongoose = require("mongoose");
  * @param {Object|string} channel - The channel object or channel ID to set up.
  * @returns {Object} - The data object for the channel.
  */
-const setupChannel = async (channel) => {
+async function setupChannel(channel){
   let data;
   // check if channel is not obj then fetch channel as if channel var is channel id
   if (!(typeof channel === "object") || typeof channel === "string") {

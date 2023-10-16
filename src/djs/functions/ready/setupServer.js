@@ -9,7 +9,7 @@ const mongoose = require("mongoose");
  * @param {Object|string} guild - The guild object or guild ID to set up.
  * @returns {Object} - The data object for the guild.
  */
-const setupServer = async (guild) => {
+async function setupServer(guild){
   // first check if the server is already in the database
   let data;
   try {
