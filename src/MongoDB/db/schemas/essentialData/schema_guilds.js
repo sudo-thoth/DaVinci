@@ -30,6 +30,7 @@ preferredLocale: String, // The preferred locale of a guild with the "PUBLIC" fe
 premiumProgressBarEnabled: Boolean, //Whether this guild has its premium (boost) progress bar enabled; aka Whether the server widget displays "Server Boost level" messages 
 premiumSubscriptionCount: Number, // The total number of users currently boosting this server
 commandStyle: String, // The style in which commands are used in this server, slash or prefix or both
+commandPrefix: String, // The prefix used for commands in this server
 explicitContentFilter: {
     name: String,
     value: String,
