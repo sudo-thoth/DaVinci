@@ -1,9 +1,10 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const createEmbed = require("../../functions/create/createEmbed.js");
+const setCommandStyle = require("../../functions/commands/Administration/setCommandStyle.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("commandStyleSelection")
+    .setName("setCommandStyle")
     .setDescription("Choose command style to activate, slash, prefix or both.")
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption((option) =>
@@ -17,13 +18,18 @@ module.exports = {
         )
         .setRequired(true)
     ),
+    about: "Allows the user to select the style of command activation in a server. Options being Slash Commands, Prefix Commands, or Both Slash & Prefix Commands.",
+    sudo:["commandStyle", "commandStyleSelection", "commandStyleSelect", "commandStyleSelecting", "commandStyleSelects", "styleCommand", "styleCommandSelection", "styleCommandSelect", "styleCommandSelecting", "styleCommandSelects", "selectCommandStyle", "setCommandStyle", "setCommandStyleSelection", "setCommandStyleSelect", "setCommandStyleSelecting", "setCommandStyleSelects", "selectStyleCommand"],
+    prefix_format: "<prefix>setCommandStyle <style [both, slash, prefix]> <prefix (if style = prefix or both)>",
+    prefix_example: "!setCommandStyle prefix ,",
+    permissions: ["Administrator"],
   async execute(interaction) {
     const { options } = interaction;
     const style = options.getString("style");
 
     // call the command style selection function
     try {
-      return await commandStyleSelection(style, "slash", interaction);
+      return await setCommandStyle(style, "slash", interaction);
     } catch (error) {
       console.log(error, `Command Style Selection Request Failed`);
       // send error embed to the interaction user

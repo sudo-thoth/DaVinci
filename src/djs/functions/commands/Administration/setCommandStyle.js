@@ -4,16 +4,23 @@ const scripts = require("../../scripts/scripts.js");
 const slashCommandDisabler = require("../../slashCommandControl/slashCommandDisabler.js");
 const slashCommandEnabler = require("../../slashCommandControl/slashCommandEnabler.js");
 
+// ,commandStyle prefix !
+
 /**
  * Selects the command style (slash, prefix, or both) for a server.
  *
  * @param {string} style - The desired command style (slash, prefix, or both).
  * @param {string} type - The type of command (slash or prefix).
  * @param {Object} trigger - The interaction or message that triggered the command.
+ * @param {string} prefix - The prefix for the server.
  */
-async function commandStyleSelection(style, type, trigger) {
+async function setCommandStyle(style, type, trigger, prefix) {
   // get the guild object to get the current
   const guildObject = await client.getServer(trigger.guild);
+  // if theres no prefix passed in, use the current prefix
+  if (!prefix) {
+    prefix = guildObject.commandPrefix;
+  }
 
   const currentStyle = guildObject.commandStyle;
 
@@ -121,6 +128,7 @@ async function commandStyleSelection(style, type, trigger) {
     } else if (style === "prefix") {
       // set the command style to prefix
       guildObject.commandStyle = "prefix";
+      guildObject.commandPrefix = prefix;
       // save the updated guild object in the guilds database
       try {
         await client.guildsDB.findOneAndUpdate(
@@ -179,7 +187,7 @@ async function commandStyleSelection(style, type, trigger) {
       // send success embed to the interaction user
       const successEmbed = createEmbed({
         title: `Command Style Set to Prefix`,
-        description: `✅ The command style has been set to \`prefix command style\` for this server.`,
+        description: `✅ The command style has been set to \`prefix command style\` for this server.\nCurrent Prefix: \`${prefix}\``,
         color: scripts.getSuccessColor(),
       });
       try {
@@ -193,6 +201,7 @@ async function commandStyleSelection(style, type, trigger) {
     } else if (style === "both") {
       // set the command style to both
       guildObject.commandStyle = "both";
+      guildObject.commandPrefix = prefix;
       // save the updated guild object in the guilds database
       try {
         await client.guildsDB.findOneAndUpdate(
@@ -254,7 +263,7 @@ async function commandStyleSelection(style, type, trigger) {
       // send success embed to the interaction user
       const successEmbed = createEmbed({
         title: `Command Style Set to Both`,
-        description: `✅ The command style has been set to \`both command styles\` for this server.`,
+        description: `✅ The command style has been set to \`both command styles\` for this server.\nCurrent Prefix: \`${prefix}\``,
         color: scripts.getSuccessColor(),
       });
       try {
@@ -434,6 +443,7 @@ async function commandStyleSelection(style, type, trigger) {
     } else if (style === "prefix") {
       // set the command style to prefix
       guildObject.commandStyle = "prefix";
+      guildObject.commandPrefix = prefix;
       // save the updated guild object in the guilds database
       try {
         await client.guildsDB.findOneAndUpdate(
@@ -511,7 +521,7 @@ async function commandStyleSelection(style, type, trigger) {
       // send success embed to the interaction user
       const successEmbed = createEmbed({
         title: `Command Style Set to Prefix`,
-        description: `✅ The command style has been set to \`prefix command style\` for this server.`,
+        description: `✅ The command style has been set to \`prefix command style\` for this server.\nCurrent Prefix: \`${prefix}\``,
         color: scripts.getSuccessColor(),
       });
 
@@ -537,6 +547,7 @@ async function commandStyleSelection(style, type, trigger) {
     } else if (style === "both") {
       // set the command style to both
       guildObject.commandStyle = "both";
+      guildObject.commandPrefix = prefix;
       // save the updated guild object in the guilds database
       try {
         await client.guildsDB.findOneAndUpdate(
@@ -617,7 +628,7 @@ async function commandStyleSelection(style, type, trigger) {
       // send success embed to the interaction user
       const successEmbed = createEmbed({
         title: `Command Style Set to Both`,
-        description: `✅ The command style has been set to \`both command styles\` for this server.`,
+        description: `✅ The command style has been set to \`both command styles\` for this server.\nCurrent Prefix: \`${prefix}\``,
         color: scripts.getSuccessColor(),
       });
       try {
@@ -643,4 +654,4 @@ async function commandStyleSelection(style, type, trigger) {
   }
 }
 
-module.exports = commandStyleSelection;
+module.exports = setCommandStyle;
