@@ -1,4 +1,5 @@
 const client = require(`../../index.js`);
+const prefixHandler = require(`../../functions/prefixCommandHandling/prefixHandler.js`);
 
 if (client) {
 
@@ -57,6 +58,16 @@ client.on("messageDeleteBulk", async (messages) => {
 
 // Event listener for when a new message is created
 client.on("messageCreate", async (message) => {
+  if(!message.user.bot){
+    // TODO: Look into using the local DB so the bot does not have to make a request to the DB for every message
+
+  // pass the message through the prefix command handler
+  try {
+    await prefixHandler(message, message.content);
+  } catch (error) {
+    console.log(error, `Failed Prefix Handler Attempt`);
+  }
+}
   
 });
 
