@@ -5,6 +5,10 @@ const setupLocalDBs = require("./setupLocalDBs");
 const runFunctionEveryXMinutes = require("../scripts/runFunctionEveryXMinutes");
 const checkPermaBans = require("../checks/checkPermaBans.js");
 const checkAutoroles = require("../checks/checkAutoRoles.js");
+const getServer = require("./getServer.js");
+const getUser = require("./getUser.js");
+const getChannel = require("./getChannel.js");
+const guildObjectArrayProperties = require("./guildObjectArrayProperties.js");
 
 /**
  * Sets up all local DBs, servers, users, and channels.
@@ -13,6 +17,12 @@ const checkAutoroles = require("../checks/checkAutoRoles.js");
  */
 async function setup(client) {
   try {
+    client.getServer = getServer;
+    client.getUser = getUser;
+    client.getChannel = getChannel;
+    client.guildObjectArrayProperties = guildObjectArrayProperties;
+
+
     // setup all local DBs
     setupLocalDBs(client);
 
