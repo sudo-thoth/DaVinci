@@ -58,7 +58,7 @@ client.on("messageDeleteBulk", async (messages) => {
 
 // Event listener for when a new message is created
 client.on("messageCreate", async (message) => {
-  if(!message.user.bot){
+  if(!message.author.bot && message?.content !== ""){
     // TODO: Look into using the local DB so the bot does not have to make a request to the DB for every message
 
   // pass the message through the prefix command handler
