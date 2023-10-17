@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const createEmbed = require("../../functions/create/createEmbed.js");
 const kick = require("../../functions/commands/Moderation/kick.js");
+const scripts = require("../../functions/scripts/scripts.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -16,6 +17,12 @@ module.exports = {
     .addStringOption((option) =>
       option.setName("reason").setDescription("Reason for the kick.")
     ),
+    about: "Allows the user to kick a member from the server.",
+    sudo:["kick", "k", "boot", "bootMember", "bootUser", "bootMemberFromServer", "bootUserFromServer", "kickMember", "kickUser", "kickMemberFromServer", "kickUserFromServer"],
+    prefix_format: "<prefix>kick <user> <reason (optional)>",
+    arguments: ["user: The user to be kicked.", "reason: The reason for the kick."],
+    prefix_example: ",kick @user#0001 Spamming",
+    permissions: ["KickMembers"],
   async execute(interaction) {
     const { options } = interaction;
     const user = options.getUser("target");
