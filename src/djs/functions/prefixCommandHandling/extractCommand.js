@@ -9,6 +9,8 @@ function extractCommand(prefix, text) {
     let args = commandSentence.slice(commandName.length + 1);
     // seperate the arguments into an array
     args = args.split(" ");
+    // remove any args that are empty
+    args = args.filter(arg => arg !== "");
     // return the command name and arguments as an object
     return { commandName, args };
     
