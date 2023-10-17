@@ -9,13 +9,15 @@ function commandMatchMaker(commandName) {
         for (const command of client.commands) {
             const sudo_names = command[1].sudo;
             // first put every sudo name into all lower case as well as the commandName string variable
-            const commandNames = sudo_names.map(name => name.toLowerCase());
+            const commandNames = sudo_names?.map(name => name.toLowerCase());
             commandName = commandName.toLowerCase();
             // check if the commandName string variable is in the sudo array
-            if (commandNames.includes(commandName)) {
+            if(commandNames.length > 0){
+                if (commandNames.includes(commandName)) {
                 // if so return the command
                 return command[1];
             }
+        }
         }
         // if the commandName string variable is not in the sudo array, return false
         return false;
