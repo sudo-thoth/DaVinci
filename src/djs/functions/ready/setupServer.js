@@ -20,7 +20,7 @@ async function setupServer(guild){
       error
     );
   }
-  if (data !== null) {
+  if (data !== null && data !== undefined) {
     // if the server is already in the database, return the data object for the server
     return data;
   } else {
@@ -58,6 +58,7 @@ async function setupServer(guild){
       premiumProgressBarEnabled: guild?.premiumProgressBarEnabled, //Whether this guild has its premium (boost) progress bar enabled; aka Whether the server widget displays "Server Boost level" messages
       premiumSubscriptionCount: guild?.premiumSubscriptionCount, // The total number of users currently boosting this server
       commandStyle: "slash", // Default command style is slash, but can be changed to prefix or both
+      commandPrefix: ",",
       explicitContentFilter: {
         name:
           guild?.explicitContentFilter === 0
