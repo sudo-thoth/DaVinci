@@ -1,10 +1,11 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const createEmbed = require("../../functions/create/createEmbed.js");
 const setCommandStyle = require("../../functions/commands/Administration/setCommandStyle.js");
+const scripts = require("../../functions/scripts/scripts.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("setCommandStyle")
+    .setName("set-command-style")
     .setDescription("Choose command style to activate, slash, prefix or both.")
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption((option) =>
@@ -19,9 +20,10 @@ module.exports = {
         .setRequired(true)
     ),
     about: "Allows the user to select the style of command activation in a server. Options being Slash Commands, Prefix Commands, or Both Slash & Prefix Commands.",
-    sudo:["commandStyle", "commandStyleSelection", "commandStyleSelect", "commandStyleSelecting", "commandStyleSelects", "styleCommand", "styleCommandSelection", "styleCommandSelect", "styleCommandSelecting", "styleCommandSelects", "selectCommandStyle", "setCommandStyle", "setCommandStyleSelection", "setCommandStyleSelect", "setCommandStyleSelecting", "setCommandStyleSelects", "selectStyleCommand"],
+    sudo:["setCmdStyle","cmdStyle","cmsStyleSelect", "selectCmdStyle", "commandStyle", "commandStyleSelection","set-command-style", "set-cmd-style", "commandStyleSelect", "commandStyleSelecting", "commandStyleSelects", "styleCommand", "styleCommandSelection", "styleCommandSelect", "styleCommandSelecting", "styleCommandSelects", "selectCommandStyle", "setCommandStyle", "setCommandStyleSelection", "setCommandStyleSelect", "setCommandStyleSelecting", "setCommandStyleSelects", "selectStyleCommand"],
     prefix_format: "<prefix>setCommandStyle <style [both, slash, prefix]> <prefix (if style = prefix or both)>",
-    prefix_example: "!setCommandStyle prefix ,",
+    arguments: ["style: The style of command activation to select. Options being both, slash, or prefix.", "prefix: The prefix to use for prefix commands. Only required if style is prefix or both."],
+    prefix_example: ",setCommandStyle prefix !",
     permissions: ["Administrator"],
   async execute(interaction) {
     const { options } = interaction;
