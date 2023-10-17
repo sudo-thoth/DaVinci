@@ -3,6 +3,7 @@ const commandMatchMaker = require("./commandMatchMaker.js");
 const createEmb = require("../create/createEmbed.js")
 const commandCenter = require("./commandCenter.js");
 const scripts = require("../scripts/scripts.js");
+const extractCommand = require("./extractCommand.js");
 
 // create a command that is a prefix command handler
 
@@ -80,12 +81,41 @@ for (let i = 0; i < text.length; i++) {
 
     const {prefix_format, prefix_example, permissions, about, sudo} = command;
 
+    const permissionsCheck = async (userPermissions, permissions, message) => {
+        if(!userPermissions.includes(permissions) && !userPermissions.includes("Administrator")){
+            // send an embed to the interaction user
+            const errorEmbed = createEmb({
+                title: `❗️ Error`,
+                description: `❌ You do not have the permissions needed to run this command.\n\nPermissions Needed: \`${permissions}\``,
+                color: scripts.getErrorColor(),
+                footer:{
+                    text: client.user.displayName,
+                    iconURL: client.user.avatarURL()
+                }
+            })
+            try{
+                await message.reply({embeds: [errorEmbed]});
+            } catch (error){
+                console.log(error, `Failed Error Reply Attempt`);
+                // if the message no longer exists, send the embed to the channel
+                try{
+                    await message.channel.send({text: `<@${message.user.id}>`, embeds: [errorEmbed]});
+                } catch (error){
+                    console.log(error, `Failed Error Channel Send Attempt`);
+                }
+            }
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     const commandInfoEmbed = createEmb({
         title: `${commandName}`,
         author:{
             name: "Command Info",
         },
-        description: `About:\`\`\`${about}\`\`\`\n\nFormal Name: \`${commandName}\`\nSudo Names: \`${sudo}\`\nPermissions Needed: \`${permissions}\`\n\nPrefix Command Format: \`${prefix_format}\`\nExample: \`${prefix_example}\``,
+        description: `About:\`\`\`${about}\`\`\`\n\nFormal Name: \`${commandName}\`\n\nPermissions Needed: \`${permissions}\`\n\nPrefix Command Format: \`\`\`${prefix_format}\`\`\`\nExample: \`\`\`${prefix_example}\`\`\`\n\nSudo Names: \`${sudo}\``,
         color: "#7998ad",
         footer:{
             text: client.user.displayName,
@@ -114,10 +144,10 @@ for (let i = 0; i < text.length; i++) {
 
     switch(commandName){
 
-        // setCommandStyle Command
+        // set-command-style Command
 
-        case "setCommandStyle":
-            if((!commandArgs || commandArgs.length() === 0) || (commandArgs[0] !== "slash" && commandArgs[0] !== "prefix" && commandArgs[0] !== "both")){
+        case "set-command-style":
+            if((!commandArgs || commandArgs.length === 0) || (commandArgs[0] !== "slash" && commandArgs[0] !== "prefix" && commandArgs[0] !== "both")){
                 // reply to the message with an embed displaying the command info
                 try{
                     await message.reply({embeds: [commandInfoEmbed]});
@@ -130,6 +160,14 @@ for (let i = 0; i < text.length; i++) {
                         console.log(error, `Failed Command Info Channel Send Attempt`);
                     }
                 }
+                return;
+            }
+
+            // check the user for the permissions needed based on the permissions array
+            const userPermissions = message.member.permissions.toArray();
+
+            const userHasPermissions = await permissionsCheck(userPermissions, permissions, message);
+            if(!userHasPermissions){
                 return;
             }
 
@@ -181,6 +219,54 @@ for (let i = 0; i < text.length; i++) {
             }
             
             break;
+
+            // kick Command
+
+        case "kick":
+            // check the user for the permissions needed based on the permissions array
+            const userPermissionsKick = message.member.permissions.toArray();
+
+            const userHasPermissionsKick = await permissionsCheck(userPermissionsKick, permissions, message);
+            if(!userHasPermissionsKick){
+                return;
+            }
+
+            // if no arguments are provided, send an embed with the command info
+            if(!commandArgs || commandArgs.length === 0){
+                // reply to the message with an embed displaying the command info
+                try{
+                    await message.reply({embeds: [commandInfoEmbed]});
+                } catch (error){
+                    console.log(error, `Failed Command Info Reply Attempt`);
+                    // if the message no longer exists, send the embed to the channel
+                    try{
+                        await message.channel.send({text: `<@${message.user.id}>`, embeds: [commandInfoEmbed]});
+                    } catch (error){
+                        console.log(error, `Failed Command Info Channel Send Attempt`);
+                    }
+                }
+                return;
+            }
+
+            const user = message.mentions.users.first() || commandArgs[0];
+            const trialArg0 = commandArgs[0];
+            const reason = commandArgs[1] ? commandArgs[1] : "No reason provided.";
+
+            try{
+                return await commandCenter.kick(user, reason, "prefix", message);
+            } catch (error){
+                console.log(error, `Failed Kick Attempt`);
+                // send error embed to the interaction user
+                try{
+                    return await sendErrorEmbed(message, error, commandName);
+                } catch (error){
+                    console.log(error, `Failed Error Embed Send Attempt`);
+                }
+            }
+            break;
+
+            // ban Command
+
 
 
         default:
