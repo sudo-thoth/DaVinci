@@ -4,8 +4,13 @@ const fs = require("fs");
 const dotenv = require("dotenv")
 dotenv.config({ path: "../../../../my.env" });
 const { token, clientId} = process.env;
+const getServer = require("../../functions/ready/getServer.js");
 
 module.exports = async (client, commandFolders, path) => {
+  // require the channel, user, and guild schemas
+client.channelsDB = require(`../../../MongoDB/db/schemas/essentialData/schema_channels.js`);
+client.usersDB = require(`../../../MongoDB/db/schemas/essentialData/schema_users.js`);
+client.guildsDB = require(`../../../MongoDB/db/schemas/essentialData/schema_guilds.js`);
   client.commandArray = [];
   const filteredCommandFolders = commandFolders.filter(folder => !folder.includes('.DS_Store'));
   for (folder of filteredCommandFolders) {
@@ -22,7 +27,7 @@ module.exports = async (client, commandFolders, path) => {
   const rest = new REST({
     version: "9",
   }).setToken(token);
-
+client.rest = rest;
   (async () => {
     try {
       console.log("Started refreshing application (/) commands.");
@@ -30,7 +35,7 @@ module.exports = async (client, commandFolders, path) => {
       // for every guild check if the commandStyle is either slash or both or if there is no guildObject found for the guild, then register the commands
       const guilds = await client.guilds.fetch();
       for (const guild of guilds) {
-        const guildObject = await client.getServer(guild[1]);
+        const guildObject = await getServer(guild[1]);
         if (
           guildObject.commandStyle === "slash" ||
           guildObject.commandStyle === "both" ||
