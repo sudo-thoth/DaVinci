@@ -1,19 +1,22 @@
-// a function that seperates the text into the command name and arguments, passed in with be the prefix string and the message text
-// the function must return an object with the command name and arguments as an array
+/**
+ * Extracts the command name and arguments from a message text that starts with a given prefix.
+ * @param {string} prefix - The prefix used to identify the command.
+ * @param {string} text - The message text that contains the command and its arguments.
+ * @returns {Object} An object containing the command name and arguments.
+ */
 function extractCommand(prefix, text) {
-    // seperate the text from the prefix 
-    let commandSentence = text.slice(prefix.length);
-    // seperate the command name from the arguments
-    let commandName = commandSentence.split(" ")[0];
-    // seperate the arguments from the command name
-    let args = commandSentence.slice(commandName.length + 1);
-    // seperate the arguments into an array
-    args = args.split(" ");
-    // remove any args that are empty
-    args = args.filter(arg => arg !== "");
-    // return the command name and arguments as an object
-    return { commandName, args };
-    
+  // separate the text from the prefix
+  let commandSentence = text.slice(prefix.length);
+  // separate the command name from the arguments
+  let commandName = commandSentence.split(" ")[0];
+  // separate the arguments from the command name
+  let args = commandSentence.slice(commandName.length + 1);
+  // separate the arguments into an array
+  args = args.split(" ");
+  // remove any args that are empty
+  args = args.filter((arg) => arg !== "");
+  // return the command name and arguments as an object
+  return { commandName, args };
 }
 
 module.exports = extractCommand;

@@ -4,8 +4,6 @@ const scripts = require("../../scripts/scripts.js");
 const slashCommandDisabler = require("../../slashCommandControl/slashCommandDisabler.js");
 const slashCommandEnabler = require("../../slashCommandControl/slashCommandEnabler.js");
 
-// ,commandStyle prefix !
-
 /**
  * Selects the command style (slash, prefix, or both) for a server.
  *

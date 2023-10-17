@@ -17,12 +17,27 @@ module.exports = {
     .addStringOption((option) =>
       option.setName("reason").setDescription("Reason for the kick.")
     ),
-    about: "Allows the user to kick a member from the server.",
-    sudo:["kick", "k", "boot", "bootMember", "bootUser", "bootMemberFromServer", "bootUserFromServer", "kickMember", "kickUser", "kickMemberFromServer", "kickUserFromServer"],
-    prefix_format: "<prefix>kick <user> <reason (optional)>",
-    arguments: ["user: The user to be kicked.", "reason: The reason for the kick."],
-    prefix_example: ",kick @user#0001 Spamming",
-    permissions: ["KickMembers"],
+  about: "Allows the user to kick a member from the server.",
+  sudo: [
+    "kick",
+    "k",
+    "boot",
+    "bootMember",
+    "bootUser",
+    "bootMemberFromServer",
+    "bootUserFromServer",
+    "kickMember",
+    "kickUser",
+    "kickMemberFromServer",
+    "kickUserFromServer",
+  ],
+  prefix_format: "<prefix>kick <user> <reason (optional)>",
+  arguments: [
+    "user: The user to be kicked.",
+    "reason: The reason for the kick.",
+  ],
+  prefix_example: ",kick @user#0001 Spamming",
+  permissions: ["KickMembers"],
   async execute(interaction) {
     const { options } = interaction;
     const user = options.getUser("target");
@@ -30,6 +45,7 @@ module.exports = {
       ? options.getString("reason")
       : "No reason provided.";
     try {
+        // call the command function
       return await kick(user, reason, "slash", interaction);
     } catch (error) {
       console.log(error, `Kick Request Failed`);
