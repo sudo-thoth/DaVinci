@@ -1,5 +1,6 @@
 const createEmbed = require("../../create/createEmbed.js");
 const scripts = require("../../scripts/scripts.js");
+const client = require("../../../index.js");
 
 /**
  * Kicks a member or user from the server.
@@ -132,7 +133,7 @@ async function kick(target, reason, type, trigger) {
 
         // get the member object
         const members = await trigger.guild.members.fetch();
-        const member =
+        const member = typeof target === "object" ? members.get(target?.id) :
             members.find((m) => m.user.username === target) ||
             members.find((m) => m.user.id === target);
 
