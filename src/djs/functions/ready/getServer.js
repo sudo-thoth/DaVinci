@@ -1,5 +1,9 @@
 const client = require("../../index.js");
 const setupServer = require("./setupServer.js");
+// require the channel, user, and guild schemas
+client.channelsDB = require(`../../../MongoDB/db/schemas/essentialData/schema_channels.js`);
+client.usersDB = require(`../../../MongoDB/db/schemas/essentialData/schema_users.js`);
+client.guildsDB = require(`../../../MongoDB/db/schemas/essentialData/schema_guilds.js`);
 
   /**
    * Retrieves the data for a given server from the servers database.
