@@ -2,7 +2,7 @@ const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
 const dotenv = require("dotenv");
 dotenv.config({ path: "../../../../my.env" });
-const { token } = process.env;
+const { token, clientId } = process.env;
 
 /**
  * Disables all slash commands for a given guild.
@@ -16,7 +16,7 @@ async function slashCommandDisabler(client, guild) {
     version: "9",
   }).setToken(token);
   // disable slash commands in the server
-  await rest.put(Routes.applicationGuildCommands(client.id, guild.id), {
+  await rest.put(Routes.applicationGuildCommands(clientId, guild.id), {
     body: [],
   });
   console.log("Successfully disabled application (/) commands.");
