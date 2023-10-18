@@ -54,6 +54,10 @@ module.exports = {
         title: `Unable to Kick`,
         description: `❌ I was unable to kick ${user} for some reason.\n\`\`\`js\n${error}\n\`\`\``,
         color: scripts.getErrorColor(),
+          footer: {
+            text: interaction.client.user.displayName,
+            iconURL: interaction.client.user.displayAvatarURL()
+          }
       });
       try {
         return await interaction.reply({ embeds: [errEmbed] });

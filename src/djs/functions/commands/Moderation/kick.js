@@ -33,6 +33,10 @@ async function kick(target, reason, type, trigger) {
           title: `Unable to Kick`,
           description: `❌ I couldn't find a user with the username/id of ${target}.`,
           color: scripts.getErrorColor(),
+          footer: {
+            text: client.user.displayName,
+            iconURL: client.user.displayAvatarURL()
+          }
         });
         console.log(`Kick Request Denied: ❌`);
         try {
@@ -52,6 +56,10 @@ async function kick(target, reason, type, trigger) {
           title: `Unable to Kick`,
           description: `❌ I couldn't find a user with the username/id of ${target}.`,
           color: scripts.getErrorColor(),
+          footer: {
+            text: client.user.displayName,
+            iconURL: client.user.displayAvatarURL()
+          }
         });
         console.log(`Kick Request Denied: ❌`);
         try {
@@ -70,6 +78,10 @@ async function kick(target, reason, type, trigger) {
         title: `Unable to Kick`,
         description: `❌ You can't take action on <@${target.user.id}> since they have a higher role than <@${client.user.id}>.`,
         color: scripts.getErrorColor(),
+          footer: {
+            text: client.user.displayName,
+            iconURL: client.user.displayAvatarURL()
+          }
       });
       console.log(`Kick Request Denied: ❌`);
       try {
@@ -88,6 +100,10 @@ async function kick(target, reason, type, trigger) {
         title: `Unable to Kick`,
         description: `❌ You can't take action on <@${target.user.id}> since they have a higher role.`,
         color: scripts.getErrorColor(),
+          footer: {
+            text: client.user.displayName,
+            iconURL: client.user.displayAvatarURL()
+          }
       });
       console.log(`Kick Request Denied: ❌`);
       try {
@@ -107,6 +123,10 @@ async function kick(target, reason, type, trigger) {
         title: `Unable to Kick`,
         description: `❌ I couldn't kick <@${target.user.id}>. \n**Error:**\`\`\`js\n${error.message}\`\`\``,
         color: scripts.getErrorColor(),
+          footer: {
+            text: client.user.displayName,
+            iconURL: client.user.displayAvatarURL()
+          }
       });
       try {
         return await trigger.reply({ embeds: [errEmbed] });
@@ -147,6 +167,10 @@ async function kick(target, reason, type, trigger) {
         title: `Unable to Kick`,
         description: `❌ I couldn't find a user with the username/id of ${target}.`,
         color: scripts.getErrorColor(),
+          footer: {
+            text: client.user.displayName,
+            iconURL: client.user.displayAvatarURL()
+          }
       });
       console.log(`Kick Request Denied: ❌`);
       // reply to the message with the error embed
@@ -173,6 +197,10 @@ async function kick(target, reason, type, trigger) {
         title: `Unable to Kick`,
         description: `❌ You can't take action on <@${member.user.id}> since they have a higher role than <@${client.user.id}>.`,
         color: scripts.getErrorColor(),
+          footer: {
+            text: client.user.displayName,
+            iconURL: client.user.displayAvatarURL()
+          }
       });
       console.log(`Kick Request Denied: ❌`);
       // reply to the message with the error embed
@@ -201,6 +229,10 @@ async function kick(target, reason, type, trigger) {
         title: `Unable to Kick`,
         description: `❌ You can't take action on <@${member.user.id}> since they have a higher role.`,
         color: scripts.getErrorColor(),
+          footer: {
+            text: client.user.displayName,
+            iconURL: client.user.displayAvatarURL()
+          }
       });
       console.log(`Kick Request Denied: ❌`);
       // reply to the message with the error embed
@@ -230,6 +262,10 @@ async function kick(target, reason, type, trigger) {
         title: `Unable to Kick`,
         description: `❌ I couldn't kick <@${member.user.id}>. \n**Error:**\`\`\`js\n${error.message}\`\`\``,
         color: scripts.getErrorColor(),
+          footer: {
+            text: client.user.displayName,
+            iconURL: client.user.displayAvatarURL()
+          }
       });
       try {
         return await trigger.reply({ embeds: [errEmbed] });

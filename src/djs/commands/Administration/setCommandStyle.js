@@ -69,6 +69,10 @@ module.exports = {
         title: `Unable to Select Command Style`,
         description: `❌ I was unable to select the command style for some reason.\n\`\`\`js\n${error}\n\`\`\``,
         color: scripts.getErrorColor(),
+          footer: {
+            text: interaction.client.user.displayName,
+            iconURL: interaction.client.user.displayAvatarURL()
+          }
       });
       try {
         return await interaction.reply({ embeds: [errEmbed] });
