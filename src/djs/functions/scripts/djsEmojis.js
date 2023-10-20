@@ -20,6 +20,12 @@ const check_badge_gold = "<a:check2:1147031982329581668>" // gold check badge an
 const check_verified = "<a:verifiedcheck:1147032451982561392>"; // verified green circle check animation
 
 
+// stock emojis
+const checkmark = "✅"; // green checkmark
+const crossmark = "❌"; // red crossmark
+const questionmark = "❓"; // question mark
+const exclamationmark = "❗"; // exclamation mark
+
 // exporting emojis
 module.exports = {
     loading_dotted,
@@ -33,5 +39,10 @@ module.exports = {
     check_badge_black,
     check_badge_white,
     check_badge_gold,
-    check_verified
+    check_verified,
+    checkmark,
+    crossmark,
+    questionmark,
+    exclamationmark
+    
 }
