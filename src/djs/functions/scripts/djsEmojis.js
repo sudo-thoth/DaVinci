@@ -18,3 +18,20 @@ const check_badge_gold = "<a:check2:1147031982329581668>" // gold check badge an
 
 // other emojis
 const check_verified = "<a:verifiedcheck:1147032451982561392>"; // verified green circle check animation
+
+
+// exporting emojis
+module.exports = {
+    loading_dotted,
+    loading_spinwheel,
+    loading_google,
+    loading_circle,
+    voting_yes,
+    voting_no,
+    check_badge_green,
+    check_badge_red,
+    check_badge_black,
+    check_badge_white,
+    check_badge_gold,
+    check_verified
+}
