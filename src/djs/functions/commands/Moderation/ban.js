@@ -276,6 +276,7 @@ async function ban(target, category, reason, type, trigger){
                       iconURL: client.user.displayAvatarURL(),
                     },
                   });
+
                   try {
                     let r = await djs_scripts.send({ // send the error message via the send function
                         trigger,
@@ -305,6 +306,7 @@ async function ban(target, category, reason, type, trigger){
                       iconURL: client.user.displayAvatarURL(),
                     },
                   });
+
                   try {
                     let r = await djs_scripts.send({ // send the error message via the send function
                         trigger,
@@ -332,6 +334,7 @@ async function ban(target, category, reason, type, trigger){
                     iconURL: client.user.displayAvatarURL(),
                   },
                 });
+                
                 try {
                   let r = await djs_scripts.send({ // send the message via the send function
                     trigger,
