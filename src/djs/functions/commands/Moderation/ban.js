@@ -150,9 +150,11 @@ async function ban(target, category, reason, type, trigger){
             // ban the user
             switch (category) {
               case "standard":
+
+                // update the trigger user saying that the target is being banned
                 let banStandardEmbed = createEmbed({
                   title: "Command Loading",
-                  description: `${djsEmojis.loading_dotted} ${target} is being banned. Working on it...\n\n ⨀ **Standard Ban:** *bans the user.*`,
+                  description: `> ${djsEmojis.loading_dotted} ${target} is being banned. Working on it...\n> \n> **⨀ Standard Ban:** bans the user.`,
                   color: scripts.getSuccessColor(),
                   thumbnail: target?.user?.displayAvatarURL(),
                   footer: {
@@ -160,24 +162,28 @@ async function ban(target, category, reason, type, trigger){
                     iconURL: client.user.displayAvatarURL(),
                   },
                 });
+
                 try {
-                  await djs_scripts.send(
+                  let r = await djs_scripts.send({ // send the message via the send function
                     trigger,
-                    "interaction",
+                    triggerType: djs_scripts.type(failed),
                     triggerUser,
-                    { embeds: [banStandardEmbed] },
-                    true
-                  );
+                    messageObject: { embeds: [banStandardEmbed] },
+                    deferred: true
+                    });
+                    failed = r?.failed || failed;
+                    trigger = r?.trigger || trigger;
                 } catch (error) {
                   console.log(error, `Failed Positive Ban Message Attempt`);
                 }
 
                 try {
-                  await target.ban({ reason: reason });
+                  await target.ban({ reason: reason }); // ban the user
                 } catch (error) {
+                    // if the ban fails, send an error embed
                   banStandardEmbed = createEmbed({
-                    title: "Error Banning User",
-                    description: `${djsEmojis.exclamationmark} ${target} has not been banned. Error:\`\`\`js\n${error}\`\`\``,
+                    title: `${djsEmojis.exclamationmark} **Error Banning User**`,
+                    description: `> ${target} has not been banned.\n> Error:\`\`\`js\n${error}\`\`\``,
                     color: scripts.getErrorColor(),
                     footer: {
                       text: client.user.displayName,
@@ -186,13 +192,16 @@ async function ban(target, category, reason, type, trigger){
                   });
 
                   try {
-                    return await djs_scripts.send(
-                      backupReply,
-                      "interaction",
-                      triggerUser,
-                      { embeds: [banStandardEmbed] },
-                      true
-                    );
+                    let r = await djs_scripts.send({ // send the error message via the send function
+                        trigger,
+                        triggerType: djs_scripts.type(failed),
+                        triggerUser,
+                        messageObject: { embeds: [banStandardEmbed] },
+                        deferred: true
+                        });
+                        failed = r?.failed || failed;
+                        trigger = r?.trigger || trigger;
+                        return;
                   } catch (error) {
                     console.log(error, `Failed Negative Ban Message Attempt`);
                   }
@@ -200,8 +209,8 @@ async function ban(target, category, reason, type, trigger){
 
                 // update the trigger user saying that the target has been banned
                 const successBanEmbed = createEmbed({
-                  title: `**User Banned**`,
-                  description: `${djsEmojis.check_badge_green} ${target} has been banned.\n \`Reason: ${reason}\``,
+                  title: `${djsEmojis.check_badge_green} **User Banned**`,
+                  description: `> ${target} has been banned.\n> \`Reason: ${reason}\``,
                   color: scripts.getSuccessColor(),
                   thumbnail: target?.user?.displayAvatarURL(),
                   footer: {
@@ -209,24 +218,27 @@ async function ban(target, category, reason, type, trigger){
                     iconURL: client.user.displayAvatarURL(),
                   },
                 });
+
                 try {
-                  return await djs_scripts.send(
-                    backupReply,
-                    "interaction",
+                  let r = await djs_scripts.send({ // send the message via the send function
+                    trigger,
+                    triggerType: djs_scripts.type(failed),
                     triggerUser,
-                    { embeds: [successBanEmbed] },
-                    true
-                  );
+                    messageObject: { embeds: [successBanEmbed] },
+                    deferred: true
+                    });
+                    failed = r?.failed || failed;
+                    trigger = r?.trigger || trigger;
+                    return;
                 } catch (error) {
                   console.log(error, `Failed Positive Ban Message Attempt`);
                 }
-
                 break;
               case "soft": // TODO: Add embed updates to user
                 let banSoftEmbed = createEmbed({
                   title: "Command Loading",
                   thumbnail: target?.user?.displayAvatarURL(),
-                  description: `${djsEmojis.loading_dotted} ${target} is being soft banned. Working on it...\n\n ⨀ **Soft Ban:** *bans the user then immediately unbans them.*`,
+                  description: `${djsEmojis.loading_dotted} ${target} is being soft banned. Working on it...\n\n **⨀ Soft Ban:** *bans the user then immediately unbans them.*`,
                   color: scripts.getSuccessColor(),
                   footer: {
                     text: client.user.displayName,
@@ -330,7 +342,7 @@ async function ban(target, category, reason, type, trigger){
                 let banHardEmbed = createEmbed({
                   title: "Command Loading",
                   thumbnail: target?.user?.displayAvatarURL(),
-                  description: `> **${djsEmojis.loading_circle} ${target} is being hard banned. Working on it...** \n> \n>  ⨀ **Hard Ban:** bans the user and deletes their messages.`,
+                  description: `> **${djsEmojis.loading_circle} ${target} is being hard banned. Working on it...** \n> \n>  **⨀ Hard Ban:** bans the user and deletes their messages.`,
                   color: scripts.getSuccessColor(),
                   footer: {
                     text: client.user.displayName,
