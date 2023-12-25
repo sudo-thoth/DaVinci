@@ -1,7 +1,8 @@
-const createEmb = require("../create/createEmbed.js");
-const scripts = require("../scripts/scripts.js");
-const createBtn = require("../create/createButton.js");
+const createEmbed = require("./../create/createEmbed.js");
+const scripts = require("./scripts.js");
+const createBtn = require("./../create/createButton.js");
 const { EmbedBuilder, AttachmentBuilder } = require("discord.js");
+const client = require("./../../index.js");
 
 const discordJsCharMax = {
   embed: {
@@ -20,6 +21,317 @@ const discordJsCharMax = {
   },
 };
 
+
+
+// function to send a reply message in response to the type of trigger
+async function send({trigger, triggerType, triggerUser, messageObject, deferred = false}) {
+  switch (triggerType) {  
+    case "interaction":
+      let updatedTrigger = trigger;
+      let failed = false;
+      let iMessage = trigger?.message;
+
+    if(deferred){
+      try {
+         await trigger.editReply(messageObject);
+         return { failed: failed, trigger: updatedTrigger}
+      } catch (error) {
+        
+        // try to follow up with a message
+        try{
+          await trigger.followUp(messageObject);
+          return { failed: failed, trigger: updatedTrigger}
+        } catch (error) {
+          failed = true;
+          try {
+            updatedTrigger = await iMessage.edit(messageObject);
+            return { failed: failed, trigger: updatedTrigger}
+          } catch (error) {
+        // if error send a message replying to the iMessage message
+        try {
+          messageObject.content = `<@${triggerUser?.id}>`;
+          updatedTrigger = await iMessage.reply(messageObject);
+          return { failed: failed, trigger: updatedTrigger}
+        } catch (error) {
+          console.log(error, `Failed Message Reply Attempt`);
+          failed = true;
+          // if error send a message to the channel
+          try {
+            messageObject.content = `<@${triggerUser?.id}>`;
+            updatedTrigger = await trigger.channel.send(messageObject);
+            return { failed: failed, trigger: updatedTrigger}
+          } catch (error) {
+            console.log(error, `Failed New Message Attempt`);
+            return { failed: failed, trigger: null}
+          }
+        }
+      }
+      }
+
+      }
+    } else {
+      // if not deferred, send a reply to the trigger
+      try {
+        updatedTrigger = await trigger.reply(messageObject);
+        return { failed: failed, trigger: updatedTrigger}
+      } catch (error) {
+        failed = true;
+        try {
+          updatedTrigger = await trigger.followUp(messageObject);
+          return { failed: failed, trigger: updatedTrigger}
+        } catch (error) {
+        console.log(error, `Failed Interaction FollowUp Attempt`);
+        try {
+          updatedTrigger = await iMessage.edit(messageObject);
+          return { failed: failed, trigger: updatedTrigger}
+        } catch (error) {
+          try {
+            messageObject.content =  `${messageObject?.content ? `<@${triggerUser?.id}> | ${messageObject?.content}` : `<@${triggerUser?.id}>`}`;
+            updatedTrigger = await iMessage.reply(messageObject);
+            return { failed: failed, trigger: updatedTrigger}
+          } catch (error) {
+        // if error send a message to the channel
+        try {
+          messageObject.content =  `${messageObject?.content ? `<@${triggerUser?.id}> | ${messageObject?.content}` : `<@${triggerUser?.id}>`}`;
+          updatedTrigger = await trigger.channel.send(messageObject);
+          return { failed: failed, trigger: updatedTrigger}
+        } catch (error) {
+          console.log(error, `Failed New Message Attempt`);
+          return { failed: failed, trigger: null}
+        }
+      }
+    }
+      }
+    }
+    }
+
+    break;
+
+    case "message":
+
+    // try to edit the message
+    try {
+      updatedTrigger = await trigger.edit(messageObject);
+      return { failed: failed, trigger: updatedTrigger}
+    } catch (error) {
+      failed = true;
+      // if error send a message replying to the trigger message
+      try {
+        messageObject.content =  `${messageObject?.content ? `<@${triggerUser?.id}> | ${messageObject?.content}` : `<@${triggerUser?.id}>`}`;
+        updatedTrigger = await trigger.reply(messageObject);
+        return { failed: failed, trigger: updatedTrigger}
+      } catch (error) {
+        console.log(error, `Failed Message Reply Attempt`);
+        // if error send a message to the channel
+        try {
+          messageObject.content =  `${messageObject?.content ? `<@${triggerUser?.id}> | ${messageObject?.content}` : `<@${triggerUser?.id}>`}`;
+          updatedTrigger = await trigger.channel.send(messageObject);
+          return { failed: failed, trigger: updatedTrigger}
+        }
+        catch (error) {
+          console.log(error, `Failed New Message Attempt`);
+          return { failed: failed, trigger: null}
+        }
+      }
+    }
+
+      
+
+
+    break;
+
+    default:
+      failed = true;
+      console.log(`Invalid trigger type: ${triggerType}`);
+      return { failed: failed, trigger: updatedTrigger}
+     
+
+    }
+}
+
+
+let type = (failed) => {
+  if(failed === false) return "interaction";
+  else return "message";
+}
+
+
+/**
+ * Sends an error message and handles the error response based on the trigger type.
+ * @param {Object} options - The options for sending the error message.
+ * @param {Error} options.error - The error object.
+ * @param {string} [options.errorView="short"] - The error view type ("short" or "long").
+ * @param {Object} options.trigger - The trigger object.
+ * @param {string} options.triggerType - The type of trigger ("interaction" or "message").
+ * @param {Object} options.triggerUser - The user who triggered the error.
+ * @param {string} options.commandName - The name of the command.
+ * @param {string} [options.action=""] - The action being performed when the error occurs.
+ * @param {boolean} [options.deferred=false] - Whether the error response should be deferred.
+ * @returns {Object} - The result of sending the error message.
+ * @returns {boolean} result.failed - Indicates if sending the error message failed.
+ * @returns {Object} result.trigger - The updated trigger object.
+ */
+async function sendError({error, errorView = "short", trigger, triggerType, triggerUser, commandName, action = "", deferred = false}){
+  // action is the action that the command is doing when the error occurs
+  // errorView can be either short (showing only the error message) or long (showing the error message and the error stack), default is short
+
+  
+  // Extract the file name and line number from the error stack
+  const errorStack = error.stack || "";
+  const stackLines = errorStack.split('\n');
+  const errorLocationMatch = /\((.*):\d+:\d+\)/.exec(stackLines[1]);
+  const [,, errorFileNameAndLine] = errorLocationMatch || [];
+  const [errorFileName, errorLineNumber] = errorFileNameAndLine ? errorFileNameAndLine.split(':') : ['', ''];
+
+  // Log the file name and line number where the error occurred
+  console.log(`Error occurred in ${errorFileName}:${errorLineNumber}`);
+
+  // create the error description
+  const errorDescription = `${djsEmojis.crossmark} ${commandName !== "" ? `Running **${commandName}** ` : ""} ${action !== "" ? `An error occurred while ${action}. \`${errorFileName}:${errorLineNumber}\`` : "| An Error Occurred \`${errorFileName}:${errorLineNumber}\`"}\n\`\`\`js\n${errorView === "short" ? error?.message : error}\n\`\`\``;
+  
+  // create the error embed
+  const errorEmbed = createEmbed({
+      title: `${djsEmojis.exclamationmark} Error Occurred`,
+      description: errorDescription,
+      color: scripts.getErrorColor(),
+      footer: {
+          text: client.user.displayName,
+          iconURL: client.user.displayAvatarURL()
+      }
+  });
+
+  // create message object
+  const messageObject = { embeds: [errorEmbed] };
+
+ // TODO: Create Log Error Function
+ // await logError({trigger: trigger, triggerUser: triggerUser, error: error, commandName: commandName, action: action});
+
+  switch (triggerType) {  
+    case "interaction":
+      let updatedTrigger = trigger;
+      let failed = false;
+      let iMessage = trigger?.message;
+
+    if(deferred){
+      try {
+         updatedTrigger = await trigger.editReply(messageObject);
+         return { failed: failed, trigger: updatedTrigger}
+      } catch (error) {
+        failed = true;
+        // try to follow up with a message
+        try{
+          updatedTrigger = await trigger.followUp(messageObject);
+          return { failed: failed, trigger: updatedTrigger}
+        } catch (error) {
+          try {
+            updatedTrigger = await iMessage.edit(messageObject);
+            return { failed: failed, trigger: updatedTrigger}
+          } catch (error) {
+        // if error send a message replying to the iMessage message
+        try {
+          messageObject.content = `<@${triggerUser?.id}>`;
+          updatedTrigger = await iMessage.reply(messageObject);
+          return { failed: failed, trigger: updatedTrigger}
+        } catch (error) {
+          console.log(error, `Failed Message Reply Attempt`);
+          failed = true;
+          // if error send a message to the channel
+          try {
+            messageObject.content = `<@${triggerUser?.id}>`;
+            updatedTrigger = await trigger.channel.send(messageObject);
+            return { failed: failed, trigger: updatedTrigger}
+          } catch (error) {
+            console.log(error, `Failed New Message Attempt`);
+            return { failed: failed, trigger: null}
+          }
+        }
+      }
+      }
+
+      }
+    } else {
+      // if not deferred, send a reply to the trigger
+      try {
+        updatedTrigger = await trigger.reply(messageObject);
+        return { failed: failed, trigger: updatedTrigger}
+      } catch (error) {
+        failed = true;
+        try {
+          updatedTrigger = await trigger.followUp(messageObject);
+          return { failed: failed, trigger: updatedTrigger}
+        } catch (error) {
+        console.log(error, `Failed Interaction FollowUp Attempt`);
+        try {
+          updatedTrigger = await iMessage.edit(messageObject);
+          return { failed: failed, trigger: updatedTrigger}
+        } catch (error) {
+          try {
+            messageObject.content =  `${messageObject?.content ? `<@${triggerUser?.id}> | ${messageObject?.content}` : `<@${triggerUser?.id}>`}`;
+            updatedTrigger = await iMessage.reply(messageObject);
+            return { failed: failed, trigger: updatedTrigger}
+          } catch (error) {
+        // if error send a message to the channel
+        try {
+          messageObject.content =  `${messageObject?.content ? `<@${triggerUser?.id}> | ${messageObject?.content}` : `<@${triggerUser?.id}>`}`;
+          updatedTrigger = await trigger.channel.send(messageObject);
+          return { failed: failed, trigger: updatedTrigger}
+        } catch (error) {
+          console.log(error, `Failed New Message Attempt`);
+          return { failed: failed, trigger: null}
+        }
+      }
+    }
+      }
+    }
+    }
+
+    break;
+
+    case "message":
+
+    // try to edit the message
+    try {
+      updatedTrigger = await trigger.edit(messageObject);
+      return { failed: failed, trigger: updatedTrigger}
+    } catch (error) {
+      failed = true;
+      // if error send a message replying to the trigger message
+      try {
+        messageObject.content =  `${messageObject?.content ? `<@${triggerUser?.id}> | ${messageObject?.content}` : `<@${triggerUser?.id}>`}`;
+        updatedTrigger = await trigger.reply(messageObject);
+        return { failed: failed, trigger: updatedTrigger}
+      } catch (error) {
+        console.log(error, `Failed Message Reply Attempt`);
+        // if error send a message to the channel
+        try {
+          messageObject.content =  `${messageObject?.content ? `<@${triggerUser?.id}> | ${messageObject?.content}` : `<@${triggerUser?.id}>`}`;
+          updatedTrigger = await trigger.channel.send(messageObject);
+          return { failed: failed, trigger: updatedTrigger}
+        }
+        catch (error) {
+          console.log(error, `Failed New Message Attempt`);
+          return { failed: failed, trigger: null}
+        }
+      }
+    }
+
+      
+
+
+    break;
+
+    default:
+      failed = true;
+      console.log(`Invalid trigger type: ${triggerType}`);
+      return { failed: failed, trigger: updatedTrigger}
+     
+
+    }
+
+}
+
+
+
 /**
  * Function to handle and report errors in interactions.
  *
@@ -30,7 +342,7 @@ const discordJsCharMax = {
  */
 async function throwNewError(action, interaction, err, i) {
   try {
-    const errorEmbed = createEmb.createEmbed({
+    const errorEmbed = createEmbed({
       title: "❗️ There was an Error, Share the Error with the Developer",
       description: `__While:__ \`${
         action ?? "?"
@@ -56,7 +368,7 @@ async function throwNewError(action, interaction, err, i) {
   } catch (error) {
     if (i) {
       try {
-        const errorEmbedAlt = createEmb.createEmbed({
+        const errorEmbedAlt = createEmbed({
           title: "There was an Error, Share the Error with the Developer",
           description: `\`\`\`js\n${err}\n\`\`\`\nError Report Summary:\n\`\`\`js\nusername: ${
             i.member.user.username
@@ -83,7 +395,7 @@ async function throwNewError(action, interaction, err, i) {
         );
       }
     } else {
-      const errorEmbedDefault = createEmb.createEmbed({
+      const errorEmbedDefault = createEmbed({
         title: "There was an Error, Share the Error with the Developer",
         description: `${
           interaction.commandName
@@ -644,7 +956,7 @@ async function throwErrorReply(obj) {
     // Attempt to edit the reply with an error message embed
     await interaction.editReply({
       embeds: [
-        createEmb.createEmbed({
+        createEmbed({
           title: "❗️ There was an Error , Share the Error w the Developer",
           description:
             `__**While :**__ **\`${
@@ -686,7 +998,7 @@ async function throwErrorReply(obj) {
         // Attempt to edit the reply with an error message embed, including information about the original error
         await interaction2.editReply({
           embeds: [
-            createEmb.createEmbed({
+            createEmbed({
               title: "❗️ There was an Error , Share the Error w the Developer",
               description:
                 `ORIGINAL ERROR\n\n__**While :**__ **\`${
@@ -754,7 +1066,7 @@ async function throwErrorReply(obj) {
         // If interaction2 is not provided, send the error message to the channel
         await interaction.channel.send({
           embeds: [
-            createEmb.createEmbed({
+            createEmbed({
               title: "❗️ There was an Error , Share the Error w the Developer",
               description:
                 `ORIGINAL ERROR\n\n__**While :**__ **\`${
@@ -819,7 +1131,126 @@ async function throwErrorReply(obj) {
   }
 }
 
+/**
+ * Sends a backup reply message to a specified channel in a guild.
+ * 
+ * @param {Object|string} guild - The guild object or name/id of the guild.
+ * @param {Object|string} channel - The channel object or name/id of the channel.
+ * @param {Object|string} user - The user object or display name/id of the user.
+ * @param {Object} messageObject - The message object containing the text to send.
+ * @param {string} [additionalText=''] - Additional text to append to the message.
+ * @returns {Promise<Object>} - A promise that resolves to the sent message object or an error message.
+ */
+async function backupReplyInChannel(guild, channel, user, messageObject, additionalText = ''){
+  let messageText = '';
+  // check for invalid guild
+  if(typeof guild !== 'object'){
+      if(typeof guild === 'string'){
+          guild = client.guilds.cache.find(g => g.name === guild || g.id === guild);
+          if(!guild){
+              return console.log(`Guild not found`)
+          }
+      } else{
+          return console.log(`Guild is not an object`)
+      }
+
+  } else {
+      if(!guild.id){
+          return console.log(`Guild is not an object`)
+      }
+  }
+  // check for invalid channel
+  if(typeof channel !== 'object'){
+      if(typeof channel === 'string'){
+          channel = trigger.guild.channels.cache.find(c => c.name === channel || c.id === channel);
+          if(!channel){
+              return console.log(`Channel not found`)
+          }
+      } else{
+       return console.log(`Channel is not an object`)
+      }
+  } else if(channel?.id?.length > 0){
+      // search for the channel in the guild
+      channel = guild.channels.cache.find(c => c.id === channel.id);
+      if(!channel){
+          return console.log(`Channel not found`)
+      }
+      } else {
+          return console.log(`Channel is not a valid object`)
+      }
+      // check for invalid user
+      if(typeof user !== 'object'){
+          if(typeof user === 'string'){
+              user = guild.members.cache.find(m => m.displayName === user || m.id === user);
+              if(!user){
+                  return console.log(`User not found`)
+              }
+          } else{
+              return console.log(`User is not an object`)
+          }
+          return console.log(`User is not an object`)
+      } else if(user?.id?.length > 0){
+          // search for the user in the guild
+          user = guild.members.cache.find(m => m.id === user.id);
+          if(!user){
+              return console.log(`User not found`)
+          }
+      
+  }  else {
+      return console.log(`User is not a valid object`)
+  }
+  // check for invalid messageObject
+  if(typeof messageObject !== 'object'){
+          return console.log(`MessageObject is not an object`)
+  }
+  
+  if(messageObject?.text?.length > 0){
+      messageText = messageObject?.text + `${additionalText ? `\n${additionalText}` : ''}`;
+  } else {
+      messageText = additionalText;
+  }
+
+  if(!user?.id){
+    return console.log(`User not found`)
+}
+
+  const pingText = `<@${user.id}>`;
+  if(messageText !== ''){
+      messageText = pingText + ` | ${messageText}`;
+  } else {
+      messageText = pingText;
+  }
+
+  
+  messageObject.text = messageText;
+
+  // send the backup message to the channel
+  try {
+      return await channel.send(messageObject);
+  } catch (error) {
+      const errorEmbed = createEmbed({
+          title: `Error Sending Message`,
+          description: `${djsEmojis.crossmark} I was unable to send the message to the channel (<#${channel.id}>).\n\n**Error:**\`\`\`js\n${error}\n\`\`\``,
+          color: scripts.getErrorColor(),
+          footer: {
+              text: client.user.displayName,
+              iconURL: client.user.displayAvatarURL()
+          }
+      });
+
+      // send the error message to the channel
+      try {
+          return await channel.send({ text: pingText, embeds: [errorEmbed] });
+      } catch (error) {
+          console.log(error, `Failed to send error message to channel`);
+      }
+      
+  }
+
+}
+
 module.exports = {
+  backupReplyInChannel,
   throwErrorReply,
   getRandID,
   getInteractionObj,
@@ -843,4 +1274,7 @@ module.exports = {
   createAttachment,
   discordJsCharMax,
   throwNewError,
+  send,
+  sendError,
+  type
 };
