@@ -18,6 +18,7 @@ const check_badge_gold = "<a:check2:1147031982329581668>" // gold check badge an
 
 // other emojis
 const check_verified = "<a:verifiedcheck:1147032451982561392>"; // verified green circle check animation
+const giveaway_animated = "<a:giveaway:1147032344555840000>"; // giveaway animation
 
 
 // stock emojis
@@ -43,6 +44,7 @@ module.exports = {
     checkmark,
     crossmark,
     questionmark,
-    exclamationmark
+    exclamationmark,
+    giveaway_animated
     
 }
