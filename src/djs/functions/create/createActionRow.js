@@ -2,7 +2,8 @@
 const {
     ActionRowBuilder,
   } = require("discord.js");
-  const scripts = require('../scripts/scripts.js');
+  const scripts = require('./../scripts/scripts.js');
+  
   
   //   // Example Action Row Object that gets passed in below
   //   let actionRowObj = {

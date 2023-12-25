@@ -29,7 +29,7 @@
  */
 
 const { EmbedBuilder } = require("discord.js");
-const scripts = require("../scripts/scripts.js");
+const scripts = require("./../scripts/scripts.js");
 
 /* Example embed object that gets passed in below
 const embedObj = {

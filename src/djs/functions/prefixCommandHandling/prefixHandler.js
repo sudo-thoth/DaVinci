@@ -1,8 +1,8 @@
-const client = require("../../index.js");
+const client = require("./../../index.js");
 const commandMatchMaker = require("./commandMatchMaker.js");
-const createEmb = require("../create/createEmbed.js");
+const createEmb = require("./../create/createEmbed.js");
 const commandCenter = require("./commandCenter.js");
-const scripts = require("../scripts/scripts.js");
+const scripts = require("./../scripts/scripts.js");
 const extractCommand = require("./extractCommand.js");
 
 /**

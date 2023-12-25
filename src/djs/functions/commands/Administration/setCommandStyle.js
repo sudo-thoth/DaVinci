@@ -1,6 +1,6 @@
-const client = require("../../../index.js");
-const createEmbed = require("../../create/createEmbed.js");
-const scripts = require("../../scripts/scripts.js");
+const client = require("./../../../index.js");
+const createEmbed = require(".././../create/createEmbed.js");
+const scripts = require("./../../scripts/scripts.js");
 const slashCommandDisabler = require("../../slashCommandControl/slashCommandDisabler.js");
 const slashCommandEnabler = require("../../slashCommandControl/slashCommandEnabler.js");
 

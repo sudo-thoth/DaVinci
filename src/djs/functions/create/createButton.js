@@ -1,6 +1,6 @@
 // IMPORTS ...
 const { ButtonBuilder, ButtonStyle } = require("discord.js");
-const scripts = require("../scripts/scripts.js");
+const scripts = require("./../scripts/scripts.js");
 
 /**
  * Creates a new row using the provided button object.

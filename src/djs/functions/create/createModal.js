@@ -5,7 +5,7 @@ const {
   TextInputBuilder,
   TextInputStyle,
 } = require("discord.js");
-const scripts = require('../scripts/scripts.js');
+const scripts = require('./../scripts/scripts.js');
 
 //   // Example Modal Object that gets passed in below
 //   let modalObj = {
