@@ -1,4 +1,10 @@
 const djsEmojis = require("../../scripts/djsEmojis.js");
+const createEmbed = require("./../../create/createEmbed.js");
+const scripts = require("./../../scripts/scripts.js");
+const commandCenter = require("./../../../functions/prefixCommandHandling/commandCenter.js");
+const client = require("../../../index.js");
+const djs_scripts = require("./../../scripts/scripts_djs.js");
+
 
 
 // create a function that will be called when the ban command is ran.
@@ -9,11 +15,41 @@ const djsEmojis = require("../../scripts/djsEmojis.js");
 // permaban: ban the user, add them to the permanent ban list, and delete their messages.
 
 async function ban(target, category, reason, type, trigger){
-
-
+    
+    let failed = false;
+    let sendStatus;
+    
 
     // Slash Command
     if(type === "slash"){
+
+
+        // defer the reply to the interaction
+        try {
+            await trigger.deferReply();
+        } catch (error) {
+
+            const errEmbed = createEmbed({
+                title: `Unable to Ban: ${category}`,
+                description: `${djsEmojis.crossmark} I was unable to defer the reply to the interaction from ${trigger?.user || "*Unknown*"}.`,
+                color: scripts.getErrorColor(),
+                footer: {
+                    text: client.user.displayName,
+                    iconURL: client.user.displayAvatarURL()
+                }
+              });
+
+            // if the reply fails, send the message to the channel and ping the trigger user
+            try {
+                return await trigger.channel.send({ text: `<@${trigger.user.id}>`, embeds: [errEmbed] });
+            } catch (error) {
+                console.log(error, `Failed Negative Ban Message Attempt`);
+            }
+
+        }
+
+        const triggerUser = trigger?.user || "*Unknown*";
+        let backupReply = trigger;
         // make sure that the target is of type Object and if not then take the string input and search the guild for a member with that name or id
     if (typeof target !== "object") {
         const members = await trigger.guild.members.fetch();
@@ -33,7 +69,7 @@ async function ban(target, category, reason, type, trigger){
           });
           console.log(`Ban [${category}] Request Denied: ${djsEmojis.crossmark}`);
           try {
-            return await trigger.editReply({ embeds: [errEmbed] });
+            return await djs_scripts.send(backupReply, "interaction", triggerUser, { embeds: [errEmbed] }, true)
           } catch (error) {
             console.log(error, `Failed Negative Ban Message Attempt`);
           }
@@ -56,7 +92,10 @@ async function ban(target, category, reason, type, trigger){
         });
         console.log(`Ban [${category}] Request Denied: ${djsEmojis.crossmark}`);
         try {
-          return await trigger.editReply({ embeds: [errEmbed] });
+            // send the error message via the send function
+            sendStatus = await djs_scripts.send(backupReply, "interaction", triggerUser, { embeds: [errEmbed] }, true)
+            backupReply = sendStatus?.trigger || backupReply;
+            return
         } catch (error) {
           console.log(error, `Failed Negative Ban Message Attempt`);
         }
@@ -78,7 +117,7 @@ async function ban(target, category, reason, type, trigger){
             });
             console.log(`Ban [${category}] Request Denied: ${djsEmojis.crossmark}`);
             try {
-            return await trigger.editReply({ embeds: [errEmbed] });
+            return await djs_scripts.send(backupReply, "interaction", triggerUser, { embeds: [errEmbed] }, true)
             } catch (error) {
             console.log(error, `Failed Negative Ban Message Attempt`);
             }
@@ -98,38 +137,36 @@ async function ban(target, category, reason, type, trigger){
             });
             console.log(`Ban [${category}] Request Denied: ${djsEmojis.crossmark}`);
             try {
-            return await trigger.editReply({ embeds: [errEmbed] });
+            return await djs_scripts.send(backupReply, "interaction", triggerUser, { embeds: [errEmbed] }, true)
             } catch (error) {
             console.log(error, `Failed Negative Ban Message Attempt`);
             }
         }
 
-        let backupReply, failed;
+        
         try{
+            let backupReply = trigger;
+            // console.log(backupReply)
             // ban the user
             switch(category){
                 case "standard":
                 let banStandardEmbed = createEmbed({
-                    description: `${djsEmojis.loading_dotted} ${target} is being banned. Working on it...`,
+                    title: "Command Loading",
+                    description: `${djsEmojis.loading_dotted} ${target} is being banned. Working on it...\n\n ⨀ **Standard Ban:** *bans the user.*`,
                     color: scripts.getSuccessColor(),
+                    thumbnail: target?.user?.displayAvatarURL(),
                     footer: {
                         text: client.user.displayName,
                         iconURL: client.user.displayAvatarURL()
                     }
                 });
                 try {
-                    return backupReply = await trigger.channel.send({ text: `<@${trigger.user.id}>`, embeds: [banStandardEmbed] });
-                    await trigger.editReply({ embeds: [banStandardEmbed] });
+                     await djs_scripts.send(trigger, "interaction", triggerUser, { embeds: [banStandardEmbed] }, true)
                 } catch (error) {
                     console.log(error, `Failed Positive Ban Message Attempt`);
-                    // if the message fails to send, send the message to the channel and ping the trigger user
-                    try {
-                        failed = true;
-                        return backupReply = await trigger.channel.send({ text: `<@${trigger.user.id}>`, embeds: [banStandardEmbed] });
-                    } catch (error) {
-                        console.log(error, `Failed Positive Ban Message Attempt`);
-                    }
                 }
+
+                
                     try {
                         await target.ban({reason: reason});
                     } catch (error) {
@@ -142,22 +179,53 @@ async function ban(target, category, reason, type, trigger){
                                 iconURL: client.user.displayAvatarURL()
                             }
                         });
-                        try {
-                            return await trigger.editReply({ embeds: [banStandardEmbed] });
+                        
+                            try {
+                                return await djs_scripts.send(backupReply, "interaction", triggerUser, { embeds: [banStandardEmbed] }, true)
                         } catch (error) {
                             console.log(error, `Failed Negative Ban Message Attempt`);
-                            // if the message fails to send, send the message to the channel and ping the trigger user
-                            try {
-                                failed = true;
-                                return backupReply = await trigger.channel.send({ text: `<@${trigger.user.id}>`, embeds: [banStandardEmbed] });
-                            } catch (error) {
-                                console.log(error, `Failed Negative Ban Message Attempt`);
-                            }
                         }
-                        
+                }
+
+                    // update the trigger user saying that the target has been banned
+                    const successBanEmbed = createEmbed({
+                        title: `**User Banned**`,
+                        description: `${djsEmojis.check_badge_green} ${target} has been banned.\n \`Reason: ${reason}\``,
+                        color: scripts.getSuccessColor(),
+                        thumbnail: target?.user?.displayAvatarURL(),
+                        footer: {
+                            text: client.user.displayName,
+                            iconURL: client.user.displayAvatarURL()
+                        }
+                    });
+                    try {
+                        return await djs_scripts.send(backupReply, "interaction", triggerUser, { embeds: [successBanEmbed] }, true)
+                    } catch (error) {
+                        console.log(error, `Failed Positive Ban Message Attempt`);
                     }
+
                     break;
                 case "soft": // TODO: Add embed updates to user
+                let banSoftEmbed = createEmbed({
+                    title: "Command Loading",
+                    thumbnail: target?.user?.displayAvatarURL(),
+                    description: `${djsEmojis.loading_dotted} ${target} is being soft banned. Working on it...\n\n ⨀ **Soft Ban:** *bans the user then immediately unbans them.*`,
+                    color: scripts.getSuccessColor(),
+                    footer: {
+                        text: client.user.displayName,
+                        iconURL: client.user.displayAvatarURL()
+                    }
+                });
+
+                // send the message to the user editing the interaction and if it fails send the message to the channel and ping the trigger user
+                try{
+                    sendStatus = await djs_scripts.send(backupReply, "interaction", triggerUser, { embeds: [errEmbed] }, true)
+                        failed = sendStatus?.failed || failed;
+                        backupReply = sendStatus?.trigger || backupReply;
+                } catch (error) {
+                    console.log(error, `Failed Positive Ban Message Attempt`);
+                }
+
                 try {
                     await target.ban({reason: reason});
                 } catch (error) {
@@ -171,16 +239,9 @@ async function ban(target, category, reason, type, trigger){
                         }
                     });
                     try {
-                        return await trigger.editReply({ embeds: [banStandardEmbed] });
+                        return await djs_scripts.send(backupReply, "interaction", triggerUser, { embeds: [banStandardEmbed] }, true)
                     } catch (error) {
                         console.log(error, `Failed Negative Ban Message Attempt`);
-                        // if the message fails to send, send the message to the channel and ping the trigger user
-                        try {
-                            failed = true;
-                            return backupReply = await trigger.channel.send({ text: `<@${trigger.user.id}>`, embeds: [banStandardEmbed] });
-                        } catch (error) {
-                            console.log(error, `Failed Negative Ban Message Attempt`);
-                        }
                     }
                     
                 }
@@ -198,28 +259,72 @@ async function ban(target, category, reason, type, trigger){
                             }
                         });
                         try {
-                            return await trigger.editReply({ embeds: [banStandardEmbed] });
+                            return await djs_scripts.send(backupReply, "interaction", triggerUser, { embeds: [banStandardEmbed] }, true)
                         } catch (error) {
                             console.log(error, `Failed Negative Ban Message Attempt`);
-                            // if the message fails to send, send the message to the channel and ping the trigger user
-                            try {
-                                failed = true;
-                                return backupReply = await trigger.channel.send({ text: `<@${trigger.user.id}>`, embeds: [banStandardEmbed] });
-                            } catch (error) {
-                                console.log(error, `Failed Negative Ban Message Attempt`);
-                            }
                         }
                         
                     }
+
+                    // update the trigger user saying that the target soft ban has been completed
+
+                     banSoftEmbed = createEmbed({
+                        title: `User Soft Banned`,
+                        description: `${djsEmojis.check_badge_green} ${target} has been soft banned.\n ⨀ __Reason:__ \`${reason}\``,
+                        color: scripts.getSuccessColor(),
+                        thumbnail: target?.user?.displayAvatarURL(),
+                        footer: {
+                            text: client.user.displayName,
+                            iconURL: client.user.displayAvatarURL()
+                        }
+                    });
+                    try {
+                        return await djs_scripts.send(backupReply, "interaction", triggerUser, { embeds: [banSoftEmbed] }, true)
+                    }
+                    catch (error) {
+                        console.log(error, `Failed Positive Ban Message Attempt`);
+                    }
+
                     break;
                 case "hard":
                     let banHardEmbed;
+
+                    banHardEmbed = createEmbed({
+                        title: "Command Loading",
+                        thumbnail: target?.user?.displayAvatarURL(),
+                        description: `> **${djsEmojis.loading_circle} ${target} is being hard banned. Working on it...** \n> \n>  ⨀ **Hard Ban:** bans the user and deletes their messages.`,
+                        color: scripts.getSuccessColor(),
+                        footer: {
+                            text: client.user.displayName,
+                            iconURL: client.user.displayAvatarURL()
+                        }
+                    });
+    
+                    // backupReply = trigger; // delete
+                    // send the message to the user editing the interaction and if it fails send the message to the channel and ping the trigger user
+                    try{
+                        let r = await djs_scripts.send(trigger, djs_scripts.type(failed), triggerUser, { embeds: [banHardEmbed] }, true)
+                        failed = r?.failed || failed;
+                        trigger = r?.trigger || trigger;
+                    } catch (error) {
+                        console.log(error, `Failed Positive Ban Message Attempt`);
+                        // send an error message using an error message function
+                        try {
+                            let r = await djs_scripts.sendError({error: error, errorView: "long", trigger: trigger, triggerType: djs_scripts.type(failed), triggerUser: triggerUser, commandName: "Hard Ban", action: "Sending Update Message", deferred: true});
+                            failed = r?.failed || failed;
+                            trigger = r?.trigger || trigger;
+                            return;
+                        } catch (error) {
+                            console.log(error, `Failed Negative Ban Message Attempt`);
+                        }
+                    }
+
                     try {
                         await target.ban({reason: reason});
                     } catch (error) {
                         banHardEmbed = createEmbed({
                             title: "Error Banning User",
-                            description: `${djsEmojis.exclamationmark} ${target} has not been banned. Error:\`\`\`js\n${error}\`\`\``,
+                            description: `> **${djsEmojis.exclamationmark} ${target} has not been banned.**\n> Error:\`\`\`js\n${error}\`\`\``,
                             color: scripts.getErrorColor(),
                             footer: {
                                 text: client.user.displayName,
@@ -227,23 +332,29 @@ async function ban(target, category, reason, type, trigger){
                             }
                         });
                         try {
-                            return await trigger.editReply({ embeds: [banHardEmbed] });
+                            let r = await djs_scripts.send(trigger, djs_scripts.type(failed), triggerUser, { embeds: [banHardEmbed] }, true)
+                        failed = r?.failed || failed;
+                        trigger = r?.trigger || trigger;
+                        return;
                         } catch (error) {
                             console.log(error, `Failed Negative Ban Message Attempt`);
-                            // if the message fails to send, send the message to the channel and ping the trigger user
-                            try {
-                                failed = true;
-                                return backupReply = await trigger.channel.send({ text: `<@${trigger.user.id}>`, embeds: [banHardEmbed] });
-                            } catch (error) {
-                                console.log(error, `Failed Negative Ban Message Attempt`);
-                            }
+                           // send an error message using an error message function
+                        try {
+                            let r = await djs_scripts.sendError({error: error, errorView: "long", trigger: trigger, triggerType: djs_scripts.type(failed), triggerUser: triggerUser, commandName: "Hard Ban", action: "Banning the Target User", deferred: true});
+                            failed = r?.failed || failed;
+                            trigger = r?.trigger || trigger;
+                            return;
+                        } catch (error) {
+                            console.log(error, `Failed Negative Ban Message Attempt`);
+                        }
                         }
                         
                     }
                     // update the trigger user saying that the target has been banned
                     const banEmbed = createEmbed({
-                        title: `User Banned`,
-                        description: `${djsEmojis.checkmark} ${target} has been banned. Working on deleting their messages.`,
+                        title: `${djsEmojis.checkmark} **User Banned**`,
+                    thumbnail: target?.user?.displayAvatarURL(),
+                        description: `> **${target} has been banned. Working on deleting their messages...** \n> \n>  ⨀ __Reason:__ \`${reason}\``,
                         color: scripts.getSuccessColor(),
                         footer: {
                             text: client.user.displayName,
@@ -251,15 +362,20 @@ async function ban(target, category, reason, type, trigger){
                         }
                     });
                     try {
-                        await trigger.editReply({ embeds: [banEmbed] });
+                        let r = await djs_scripts.send(trigger, djs_scripts.type(failed), triggerUser, { embeds: [banEmbed] }, true)
+                        failed = r?.failed || failed;
+                        trigger = r?.trigger || trigger;
                     } catch (error) {
                         console.log(error, `Failed Positive Ban Message Attempt`);
                         // if the message fails to send, send the message to the channel and ping the trigger user
+                        // send an error message using an error message function
                         try {
-                            failed = true;
-                            backupReply = await trigger.channel.send({ text: `<@${trigger.user.id}>`, embeds: [banEmbed] });
+                            let r = await djs_scripts.sendError({error: error, errorView: "long", trigger: trigger, triggerType: djs_scripts.type(failed), triggerUser: triggerUser, commandName: "Hard Ban", action: "Sending Ban Confirmation Message. No Messages Deleted Yet", deferred: true});
+                            failed = r?.failed || failed;
+                            trigger = r?.trigger || trigger;
+                            return;
                         } catch (error) {
-                            console.log(error, `Failed Positive Ban Message Attempt`);
+                            console.log(error, `Failed Negative Ban Message Attempt`);
                         }
 
                     }
@@ -268,43 +384,55 @@ async function ban(target, category, reason, type, trigger){
                     // delete all messages from the user from within the server
                     // loop through all channels and all messages in batches of 100 or less
                     // use the last found message id to get the next batch of messages until there are no more messages to fetch, without using a forEach loop
-                    const channels = await trigger.guild.channels.fetch();
+                    let channels = await trigger.guild.channels.fetch();
                     let count = 0;
                     let messageCount = 0;
+                    let totalMessageCount = 0;
+
+                    // filter channels to only include text channels
+                    channels = channels.filter((channel) => channel.type === 0 || channel.type === 2); // type 0 is a text channel // a voice channel is type 2
                     for (const channel of channels.values()) {
+                        // type 4 is a category channel
+                        if (channel.type === 4) continue;
+
+                        // fetch the channel
+                        await channel.fetch();
+                        
                         // send a message stating, working on current channel and x/number of channels
                         const channelEmbed = createEmbed({
-                            title: banEmbed.title,
-                            description: `<a:verify:1100873948041855017> **Deleting Messages**\n\n\`Working on ${channel.name} (${++count}/${channels.size})\`${messageCount > 5000 ? `\n\n${messageCount} messages deleted so far.` : ""}}`,
-                            color: banEmbed.color,
-                            footer: banEmbed.footer
+                            title: "Command Loading",
+                            title: banEmbed.data.title,
+                            description: `> ${djsEmojis.loading_circle} **Deleting Messages**\n> ${messageCount > 0 ? `\`deleted ${messageCount}\`` : `\`deleted --\``}\n> \`Working on\` <#${channel?.id}> \`(${++count}/${channels.size})\`${messageCount > 5000 ? `\n> \n> ${messageCount} messages deleted so far.` : ""}`,
+                            color: banEmbed.data.color,
+                            footer: banEmbed.data.footer
                         });
                         // send the updated message to the channel
                         try {
-                            if(failed) await backupReply.edit({ embeds: [channelEmbed] });
-                            else await trigger.editReply({ embeds: [channelEmbed] });
+                            let r = await djs_scripts.send(trigger, djs_scripts.type(failed), triggerUser, { embeds: [channelEmbed] }, true)
+                            failed = r?.failed || failed;
+                            trigger = r?.trigger || trigger;
+                        
                         } catch (error) {
                             console.log(error, `Failed Positive Ban Message Attempt`);
                             // if the message fails to send, send the message to the channel and ping the trigger user
-                            try {
-                                failed = true;
-                                backupReply = await trigger.channel.send({ text: `<@${trigger.user.id}>`, embeds: [channelEmbed] });
-                            } catch (error) {
-                                console.log(error, `Failed Positive Ban Message Attempt`);
-                            }
+                            // TODO: Log Error
                         }
-                        let last_id = 0;
+                        let last_id = null;
                         while (true) {
-                            const messages = await channel.messages.fetch({ limit: 100, before: last_id });
-                            if (messages?.size === 0) break;
+                            let messages = await channel?.messages.fetch({ limit: 100, before: last_id });
+                            
+                            if (messages?.size === 0 || !messages) break;
                             const userMessages = messages.filter((m) => m.author.id === target.id);
+                            if (userMessages.size !== 0) {
                             try {
                                 await channel.bulkDelete(userMessages);
-                                messageCount += messages.size;
+                                messageCount += userMessages.size;
+                                totalMessageCount += messages.size;
                             } catch (error) {
                                 console.log(`Failed to Delete Messages in Bulk`);
                                 // if bulk delete fails, delete the messages individually
-                                userMessages.forEach(async (message) => {
+                                for (let message of userMessages) {
+                                    message = message[1];
                                     try {
                                         await message.delete();
                                         messageCount++;
@@ -316,72 +444,123 @@ async function ban(target, category, reason, type, trigger){
                                             description: `${djsEmojis.crossmark} I was unable to delete all messages from ${target.displayName}.\nCompleted About ${messageCount}\n\`\`\`js\n${error}\n\`\`\``,
                                     });
                                         try {
-                                            if(failed) await backupReply.edit({ embeds: [errEmbed] });
-                                            else await trigger.editReply({ embeds: [errEmbed] });
+                                            let r = await djs_scripts.send(trigger, djs_scripts.type(failed), triggerUser, { embeds: [errEmbed] }, true)
+                                            failed = r?.failed || failed;
+                                            trigger = r?.trigger || trigger;
                                         } catch (error) {
                                             console.log(error, `Failed Negative Ban Message Attempt`);
-                                            // if the message fails to send, send the message to the channel and ping the trigger user
-                                            try {
-                                                failed = true;
-                                                backupReply = await trigger.channel.send({ text: `<@${trigger.user.id}>`, embeds: [errEmbed] });
-                                            } catch (error) {
+                                          try {
+                                             let r = await djs_scripts.sendError({error: error, errorView: "short", trigger: trigger, triggerType: djs_scripts.type(failed), triggerUser: triggerUser, commandName: "Hard Ban", action: "Deleting All Target Users Messages, User is Banned", deferred: true});
+                                              failed = r?.failed || failed;
+                                              trigger = r?.trigger || trigger;
+                                              return;
+                                          } catch (error) {
                                                 console.log(error, `Failed Negative Ban Message Attempt`);
-                                            }
+                                            
+                                          }
                                         }
                                     }
-                                });
+                                }
+                                // const deletePromises = [...userMessages].map(async (message) => {
+                                //     try {
+                                //         await message.delete();
+                                //         messageCount++;
+                                //     } catch (error) {
+                                //         console.log(`Failed to Delete Message`);
+                                //         // if the message fails to delete, send the message to the channel and ping the trigger user
+                                //         const errEmbed = createEmbed({  
+                                //             title: `Error Occurred`,
+                                //             description: `${djsEmojis.crossmark} I was unable to delete all messages from ${target.displayName}.\nCompleted About ${messageCount}\n\`\`\`js\n${error}\n\`\`\``,
+                                //     });
+                                //         try {
+                                //             let r = await djs_scripts.send(trigger, djs_scripts.type(failed), triggerUser, { embeds: [errEmbed] }, true)
+                                //             failed = r?.failed || failed;
+                                //             trigger = r?.trigger || trigger;
+                                //         } catch (error) {
+                                //             console.log(error, `Failed Negative Ban Message Attempt`);
+                                //           try {
+                                //              let r = await djs_scripts.sendError({error: error, errorView: "short", trigger: trigger, triggerType: djs_scripts.type(failed), triggerUser: triggerUser, commandName: "Hard Ban", action: "Deleting All Target Users Messages, User is Banned", deferred: true});
+                                //               failed = r?.failed || failed;
+                                //               trigger = r?.trigger || trigger;
+                                //               return;
+                                //           } catch (error) {
+                                //                 console.log(error, `Failed Negative Ban Message Attempt`);
+                                            
+                                //           }
+                                //         }
+                                //     }
+                                // });
+                                
+                                // // Execute all promises concurrently
+                                // await Promise.all(deletePromises);
+                                // userMessages.forEach(async (message) => {
+                                //     try {
+                                //         await message.delete();
+                                //         messageCount++;
+                                //     } catch (error) {
+                                //         console.log(`Failed to Delete Message`);
+                                //         // if the message fails to delete, send the message to the channel and ping the trigger user
+                                //         const errEmbed = createEmbed({  
+                                //             title: `Error Occurred`,
+                                //             description: `${djsEmojis.crossmark} I was unable to delete all messages from ${target.displayName}.\nCompleted About ${messageCount}\n\`\`\`js\n${error}\n\`\`\``,
+                                //     });
+                                //         try {
+                                //             let r = await djs_scripts.send(trigger, djs_scripts.type(failed), triggerUser, { embeds: [errEmbed] }, true)
+                                //             failed = r?.failed || failed;
+                                //             trigger = r?.trigger || trigger;
+                                //         } catch (error) {
+                                //             console.log(error, `Failed Negative Ban Message Attempt`);
+                                //           try {
+                                //              let r = await djs_scripts.sendError({error: error, errorView: "short", trigger: trigger, triggerType: djs_scripts.type(failed), triggerUser: triggerUser, commandName: "Hard Ban", action: "Deleting All Target Users Messages, User is Banned", deferred: true});
+                                //               failed = r?.failed || failed;
+                                //               trigger = r?.trigger || trigger;
+                                //               return;
+                                //           } catch (error) {
+                                //                 console.log(error, `Failed Negative Ban Message Attempt`);
+                                            
+                                //           }
+                                //         }
+                                //     }
+                                // });
+                                
                             }   
+                        }
                             last_id = messages.last().id;
                         }
-
-                        // update the message to say that the channel is done
-                        const channelEmbed2 = createEmbed({
-                            title: banEmbed.title,
-                            description: `${djsEmojis.checkmark} ${target.displayName} has been banned.\n<a:check2:1147031982329581668> **All Their Messages Have Been Deleted**${messageCount > 5000 ? `\n\n\`${messageCount} Total Messages Deleted.\`` : ""}\n\n**Last Checked Channel:** __${channel.name}__\n**\`Total Channels Checked: ${count}/${channels.size}\`**`,
-                            color: scripts.getSuccessColor(),
-                            footer: banEmbed.footer
-                        });
-                        // send the updated message to the channel
-                        try {
-                            if(failed) await backupReply.edit({ embeds: [channelEmbed2] });
-                            else await trigger.editReply({ embeds: [channelEmbed2] });
-                        } catch (error) {
-                            console.log(error, `Failed Positive Ban Message Attempt`);
-                            // if the message fails to send, send the message to the channel and ping the trigger user
-                            try {
-                                failed = true;
-                                backupReply = await trigger.channel.send({ text: `<@${trigger.user.id}>`, embeds: [channelEmbed2] });
-                            } catch (error) {
-                                console.log(error, `Failed Positive Ban Message Attempt`);
-                            }
                         }
-                    }
 
                     // update the message to say that the user has been banned and all messages have been deleted
                     const banEmbed2 = createEmbed({
-                        title: banEmbed.title,
-                        description: `${djsEmojis.checkmark} ${target.displayName} has been banned.\n<a:check2:1147031982329581668> **All Their Messages Have Been Deleted**${messageCount > 5000 ? `\n\n**\`${messageCount} Total Messages Deleted.\`**` : ""}`,
+                        title: `${djsEmojis.checkmark} **User Banned**`,
+                    thumbnail: target?.user?.displayAvatarURL(),
+                        description: `> **${target.displayName}(<@${target.id}>) has been banned.**\n> \`ban type: hard\`\n> \`Reason: ${reason}\`${messageCount > 0 ? `\n> **${djsEmojis.check_badge_gold} ${messageCount} Messages Wiped**` : `\n> **${djsEmojis.check_badge_gold} All Messages Wiped**`}`,
                         color: scripts.getSuccessColor(),
-                        footer: banEmbed.footer
+                        footer: {
+                            text: client.user.displayName,
+                            iconURL: client.user.displayAvatarURL()
+                        }
                     });
 
                     // send the updated message to the channel
                     try {
-                        if(failed) await backupReply.edit({ embeds: [banEmbed2] });
-                        else await trigger.editReply({ embeds: [banEmbed2] });
+                        let r = await djs_scripts.send(trigger, djs_scripts.type(failed), triggerUser, { embeds: [banEmbed2] }, true)
+                                            failed = r?.failed || failed;
+                                            trigger = r?.trigger || trigger;
                     } catch (error) {
                         console.log(error, `Failed Positive Ban Message Attempt`);
-                        // if the message fails to send, send the message to the channel and ping the trigger user
-                        try {
-                            failed = true;
-                            backupReply = await trigger.channel.send({ text: `<@${trigger.user.id}>`, embeds: [banEmbed2] });
-                        } catch (error) {
-                            console.log(error, `Failed Positive Ban Message Attempt`);
-                        }
+                       // send an error message using an error message function
+                       try {
+                        let r = await djs_scripts.sendError({error: error, errorView: "long", trigger: trigger, triggerType: djs_scripts.type(failed), triggerUser: triggerUser, commandName: "Hard Ban", action: "Sending Hard Ban Confirmation Message", deferred: true});
+                        failed = r?.failed || failed;
+                        trigger = r?.trigger || trigger;
+                        return;
+                    } catch (error) {
+                        console.log(error, `Failed Negative Ban Message Attempt`);
+                    }
                     }
                     break;
-                case "perma":
-                    let failed = false;
+                case "permaban":
+                    
                     let backupReply;
                     // check to see if the interaction user has Administrator permissions
                     if (!trigger.member.permissions.has("ADMINISTRATOR")) {
@@ -442,8 +621,9 @@ async function ban(target, category, reason, type, trigger){
                     }
                     // update the trigger user saying that the target has been banned and now being added to the permanent ban list
                     const banEmbed3 = createEmbed({
-                        title: `User Banned`,
+                        title: `**User Banned**`,
                         description: `${djsEmojis.checkmark} ${target} has been banned. Working on adding them to the permanent ban list ${djsEmojis.loading_dotted}`,
+                        thumbnail: target?.user?.displayAvatarURL(),
                         color: scripts.getSuccessColor(),
                         footer: {
                             text: client.user.displayName,
@@ -463,15 +643,19 @@ async function ban(target, category, reason, type, trigger){
                         }
                     }
 
-                    const status = await commandCenter.addPermaBan(target, trigger, reason);
+                    
+                    const status = await commandCenter.permaBan(target, trigger, reason, "add");
 
+                    // status: {status: true, reason: ``, trigger: backupReply}
+                    trigger = status.trigger;
                     // update the trigger user saying that the target has been banned and now being added to the permanent ban list
-                    if(status === true && typeof status !== "string"){
+                    if(status.status === true){
                         // if the user was successfully added to the permanent ban list, send a success embed
                         const banEmbed4 = createEmbed({
                             title: `User Banned & Added to Perm List`,
-                            description: `${djsEmojis.check_verified} ${target} has been banned. **They have been added to the permanent ban list.**`,
+                            description: `${djsEmojis.check_verified} ${target} has been banned. **They have been added to the permanent ban list.**\n \`Reason: ${reason}\``,
                             color: scripts.getSuccessColor(),
+                            thumbnail: target?.user?.displayAvatarURL(),
                             footer: {
                                 text: client.user.displayName,
                                 iconURL: client.user.displayAvatarURL()
@@ -495,8 +679,9 @@ async function ban(target, category, reason, type, trigger){
                         // if the user was not successfully added to the permanent ban list, send an error embed
                         const banEmbed5 = createEmbed({
                             title: `User Banned & NOT added to Perm List`,
-                            description: `${djsEmojis.crossmark} ${target} has been banned.\n\n**I was unable to add them to the permanent ban list.**\n\n${djsEmojis.exclamationmark} Error:\n>>>${status}`,
+                            description: `${djsEmojis.crossmark} ${target} has been banned.\n\n**I was unable to add them to the permanent ban list.**\n\`Reason: ${reason}\`\n\n${djsEmojis.exclamationmark} Error:\n>>>${status.reason}`,
                             color: scripts.getErrorColor(),
+                            thumbnail: target?.user?.displayAvatarURL(),
                             footer: {
                                 text: client.user.displayName,
                                 iconURL: client.user.displayAvatarURL()
@@ -530,7 +715,10 @@ async function ban(target, category, reason, type, trigger){
 
     // Prefix Command
     if(type === "prefix"){
-
+        let backupReply = trigger;
     }
 
 }
+
+// export the ban function
+module.exports = ban;
