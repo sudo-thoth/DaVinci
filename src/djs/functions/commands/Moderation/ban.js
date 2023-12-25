@@ -234,11 +234,13 @@ async function ban(target, category, reason, type, trigger){
                   console.log(error, `Failed Positive Ban Message Attempt`);
                 }
                 break;
-              case "soft": // TODO: Add embed updates to user
+              case "soft": 
+
+                // update embed message stating that the target is being soft banned
                 let banSoftEmbed = createEmbed({
                   title: "Command Loading",
                   thumbnail: target?.user?.displayAvatarURL(),
-                  description: `${djsEmojis.loading_dotted} ${target} is being soft banned. Working on it...\n\n **⨀ Soft Ban:** *bans the user then immediately unbans them.*`,
+                  description: `> ${djsEmojis.loading_dotted} ${target} is being soft banned. Working on it...\n> \n> **⨀ Soft Ban:** *bans the user then immediately unbans them.*`,
                   color: scripts.getSuccessColor(),
                   footer: {
                     text: client.user.displayName,
@@ -248,25 +250,26 @@ async function ban(target, category, reason, type, trigger){
 
                 // send the message to the user editing the interaction and if it fails send the message to the channel and ping the trigger user
                 try {
-                  sendStatus = await djs_scripts.send(
-                    backupReply,
-                    "interaction",
+                  let r = await djs_scripts.send({ // send the message via the send function
+                    trigger,
+                    triggerType: djs_scripts.type(failed),
                     triggerUser,
-                    { embeds: [errEmbed] },
-                    true
-                  );
-                  failed = sendStatus?.failed || failed;
-                  backupReply = sendStatus?.trigger || backupReply;
+                    messageObject: { embeds: [banSoftEmbed] },
+                    deferred: true
+                  });
+                  failed = r?.failed || failed;
+                  trigger = r?.trigger || trigger;
                 } catch (error) {
                   console.log(error, `Failed Positive Ban Message Attempt`);
                 }
 
                 try {
-                  await target.ban({ reason: reason });
+                  await target.ban({ reason: reason }); // ban the user
                 } catch (error) {
+                    // if the ban fails, send an error embed
                   banStandardEmbed = createEmbed({
-                    title: "Error Banning User",
-                    description: `${djsEmojis.exclamationmark} ${target} has not been banned. Error:\`\`\`js\n${error}\`\`\``,
+                    title: `${djsEmojis.exclamationmark} **Error Banning User**`,
+                    description: `> ${target} has not been banned.\n> Error:\`\`\`js\n${error}\`\`\``,
                     color: scripts.getErrorColor(),
                     footer: {
                       text: client.user.displayName,
@@ -274,24 +277,28 @@ async function ban(target, category, reason, type, trigger){
                     },
                   });
                   try {
-                    return await djs_scripts.send(
-                      backupReply,
-                      "interaction",
-                      triggerUser,
-                      { embeds: [banStandardEmbed] },
-                      true
-                    );
+                    let r = await djs_scripts.send({ // send the error message via the send function
+                        trigger,
+                        triggerType: djs_scripts.type(failed),
+                        triggerUser,
+                        messageObject: { embeds: [banStandardEmbed] },
+                        deferred: true
+                        });
+                        failed = r?.failed || failed;
+                        trigger = r?.trigger || trigger;
+                        return;
                   } catch (error) {
                     console.log(error, `Failed Negative Ban Message Attempt`);
                   }
                 }
 
                 try {
-                  await trigger.guild.members.unban(target.id);
+                  await trigger.guild.members.unban(target.id); // unban the user
                 } catch (error) {
+                    // if the unban fails, send an error embed
                   banStandardEmbed = createEmbed({
-                    title: "Error Banning User",
-                    description: `${djsEmojis.exclamationmark} ${target} has not been unbanned after being banned briefly. Error:\`\`\`js\n${error}\`\`\``,
+                    title: `${djsEmojis.exclamationmark} **Error Banning User**`,
+                    description: `> ${target} has not been unbanned after being banned briefly.\n> Error:\`\`\`js\n${error}\`\`\``,
                     color: scripts.getErrorColor(),
                     footer: {
                       text: client.user.displayName,
@@ -299,23 +306,25 @@ async function ban(target, category, reason, type, trigger){
                     },
                   });
                   try {
-                    return await djs_scripts.send(
-                      backupReply,
-                      "interaction",
-                      triggerUser,
-                      { embeds: [banStandardEmbed] },
-                      true
-                    );
+                    let r = await djs_scripts.send({ // send the error message via the send function
+                        trigger,
+                        triggerType: djs_scripts.type(failed),
+                        triggerUser,
+                        messageObject: { embeds: [banStandardEmbed] },
+                        deferred: true
+                        });
+                        failed = r?.failed || failed;
+                        trigger = r?.trigger || trigger;
+                        return;
                   } catch (error) {
                     console.log(error, `Failed Negative Ban Message Attempt`);
                   }
                 }
 
                 // update the trigger user saying that the target soft ban has been completed
-
                 banSoftEmbed = createEmbed({
-                  title: `User Soft Banned`,
-                  description: `${djsEmojis.check_badge_green} ${target} has been soft banned.\n ⨀ __Reason:__ \`${reason}\``,
+                  title: `${djsEmojis.check_badge_green} **User Soft Banned**`,
+                  description: `> ${target} has been soft banned.\n> ⨀ __Reason:__ \`${reason}\``,
                   color: scripts.getSuccessColor(),
                   thumbnail: target?.user?.displayAvatarURL(),
                   footer: {
@@ -324,13 +333,16 @@ async function ban(target, category, reason, type, trigger){
                   },
                 });
                 try {
-                  return await djs_scripts.send(
-                    backupReply,
-                    "interaction",
+                  let r = await djs_scripts.send({ // send the message via the send function
+                    trigger,
+                    triggerType: djs_scripts.type(failed),
                     triggerUser,
-                    { embeds: [banSoftEmbed] },
-                    true
-                  );
+                    messageObject: { embeds: [banSoftEmbed] },
+                    deferred: true
+                    });
+                    failed = r?.failed || failed;
+                    trigger = r?.trigger || trigger;
+                    return;
                 } catch (error) {
                   console.log(error, `Failed Positive Ban Message Attempt`);
                 }
@@ -388,7 +400,6 @@ async function ban(target, category, reason, type, trigger){
                 // ban the user
                 try {
                   await target.ban({ reason: reason });
-                  
                 } catch (error) {
 
                     // error embed
