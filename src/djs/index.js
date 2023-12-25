@@ -39,13 +39,13 @@ let dbs = new Collection();
 
 // Define folder paths for Discord.js functions, commands, events, and MongoDB configuration
 const djsFunctionFolders = fs.readdirSync("./src/djs/functions");
-const djsCommandFolders = fs.readdirSync("./src/djs/commands");
+const djsCommandFolders = fs.readdirSync("./src/djs/commands/");
 const djsEventFiles = fs
-  .readdirSync("./src/djs/client/events")
+  .readdirSync("./src/djs/client/events/")
   .filter((file) => file.endsWith(".js"));
 
 // Import necessary scripts and configurations
-const mongoConfig = fs.readdirSync("./src/MongoDB/db/config");
+const mongoConfig = fs.readdirSync("./src/MongoDB/db/config/");
 const { login_mongodb } = require("./functions/ready/login_mongodb.js");
 const { login_mega } = require("./functions/ready/login_mega.js");
 
@@ -72,7 +72,7 @@ handleFunctions(djsFunctionFolders, "./src/djs/functions");
 (async () => {
   try {
     // Connect to MongoDB
-    await login_mongodb(client, MongoDB_Token_DaVinci);
+    await login_mongodb( MongoDB_Token_DaVinci, client );
 
     // Handle commands and login to Mega
     handleCommands(client, djsCommandFolders, "./src/djs/commands").then(
