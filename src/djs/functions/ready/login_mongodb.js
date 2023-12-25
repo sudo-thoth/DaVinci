@@ -8,7 +8,7 @@ const mongoose = require("mongoose");
  *
  * @returns {Promise<void>} - A Promise that resolves when the login is successful.
  */
-async function login_mongodb(client, token) {
+async function login_mongodb( token, client ) {
   // Get the MongoDB connection from the mongoose library.
   const db = mongoose.connection;
 
