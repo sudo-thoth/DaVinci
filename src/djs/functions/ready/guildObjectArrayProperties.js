@@ -121,7 +121,7 @@ try {
       const emojiObject = {
         emojiID: emoji?.id,
         emojiName: emoji?.name,
-        emojiURL: emoji?.url,
+        emojiURL: emoji?.imageURL(),
         emojiAnimated: emoji?.animated,
       };
       // add the emoji object to the emojis array
