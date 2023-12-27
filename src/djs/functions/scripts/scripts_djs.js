@@ -24,12 +24,14 @@ const discordJsCharMax = {
 
 
 // function to send a reply message in response to the type of trigger
-async function send({trigger, triggerType, triggerUser, messageObject, deferred = false}) {
+async function send({trigger, triggerType, triggerUser, messageObject, deferred = false, failed = false}) {
+  // let failed = false;
+  let updatedTrigger = trigger;
+     
+      let iMessage = triggerType === "message" ? trigger : trigger?.message;
   switch (triggerType) {  
     case "interaction":
-      let updatedTrigger = trigger;
-      let failed = false;
-      let iMessage = trigger?.message;
+      
 
     if(deferred){
       try {
@@ -150,7 +152,7 @@ async function send({trigger, triggerType, triggerUser, messageObject, deferred 
 }
 
 
-let type = (failed) => {
+let getTriggerType = (failed) => {
   if(failed === false) return "interaction";
   else return "message";
 }
@@ -1276,5 +1278,5 @@ module.exports = {
   throwNewError,
   send,
   sendError,
-  type
+  getTriggerType
 };
