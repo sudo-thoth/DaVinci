@@ -113,6 +113,7 @@ module.exports = {
           triggerUser: interaction?.user,
           messageObject: {embeds: [errEmbed]},
           deferred: true,
+          failed
         })
       } catch (error) {
         console.log(error, `Failed Negative Ban Message Attempt`);
