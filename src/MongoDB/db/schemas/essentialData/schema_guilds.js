@@ -124,6 +124,10 @@ bans: [
             id: String,
             username: String,
             bot: Boolean,
+        },
+        timestamp: {
+            text: String,
+            value: Number,
         }
     }
 ],
@@ -134,6 +138,10 @@ permanentBans: [
             id: String,
             username: String,
             bot: Boolean,
+        }, 
+        timestamp: {
+            text: String,
+            value: Number,
         }
     }
 ],
