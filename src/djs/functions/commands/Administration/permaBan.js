@@ -1,7 +1,7 @@
 const djsEmojis = require("../../scripts/djsEmojis.js");
 const client = require("./../../../index.js");
-const createEmbed = require("../embeds/createEmbed.js");
-const scripts_djs = require("../../scripts/djs.js");
+const createEmbed = require("./../../create/createEmbed.js");
+const scripts_djs = require("./../../scripts/scripts_djs.js");
 
 
 // function to add a user to the permanent ban list in the database and local dbs
