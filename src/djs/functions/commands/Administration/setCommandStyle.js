@@ -3,7 +3,7 @@ const createEmbed = require(".././../create/createEmbed.js");
 const scripts = require("./../../scripts/scripts.js");
 const slashCommandDisabler = require("../../slashCommandControl/slashCommandDisabler.js");
 const slashCommandEnabler = require("../../slashCommandControl/slashCommandEnabler.js");
-const scripts_djs = require("../../scripts/djs.js");
+const scripts_djs = require("../../scripts/scripts_djs.js");
 const djsEmojis = require("../../scripts/djsEmojis.js");
 
 /**
@@ -39,6 +39,35 @@ async function setCommandStyle(style, type, trigger, prefix) {
       console.log(error, `Failed to Defer Reply`);
     }
 
+    // if style is not one of the valid styles, send error embed to the interaction user
+    if (style !== "slash" && style !== "prefix" && style !== "both") {
+      const errEmbed = createEmbed({
+            footer: {
+              text: client.user.displayName,
+              iconURL: client.user.displayAvatarURL(),
+            },
+            title: `${djsEmojis.crossmark} **Invalid Command Style**`,
+        description: `> The command style must be \`slash\`, \`prefix\`, or \`both\`.`,
+        color: scripts.getErrorColor(),
+      });
+      try {
+        return await scripts_djs.send({ // send the error embed via the send function
+          trigger,
+          triggerType: scripts_djs.getTriggerType(failed),
+          triggerUser: trigger?.user,
+          messageObject: {embeds: [errEmbed]},
+          deferred,
+          failed
+        })
+
+      } catch (error) {
+        console.log(
+          error,
+          `Failed Negative Command Style Selection Message Attempt`
+        );
+      }
+    }
+
     if (currentStyle === style) {
       // send error embed to the interaction user
       const errEmbed = createEmbed({
@@ -51,15 +80,15 @@ async function setCommandStyle(style, type, trigger, prefix) {
         color: scripts.getErrorColor(),
       });
       try {
-        return await scripts_djs.send({
+        return await scripts_djs.send({ // send the error embed via the send function
           trigger,
-          triggerType: "interaction",
+          triggerType: scripts_djs.getTriggerType(failed),
           triggerUser: trigger?.user,
-          messageObject: { embeds: [errEmbed] },
+          messageObject: {embeds: [errEmbed]},
           deferred,
-          failed,
-        });
-        
+          failed
+        })
+
       } catch (error) {
         console.log(
           error,
@@ -74,8 +103,10 @@ async function setCommandStyle(style, type, trigger, prefix) {
         await client.guildsDB.findOneAndUpdate(
           { serverID: trigger.guild.id },
           guildObject,
-          { upsert: true }
+          { upsert:
+            true }
         );
+
       } catch (error) {
         console.log(error, `Failed to Save Updated Guild Object`);
         // send message to the interaction user stating, was unable to complete the command
@@ -120,7 +151,7 @@ async function setCommandStyle(style, type, trigger, prefix) {
             color: scripts.getErrorColor(),
           });
           try {
-           let r = await scripts_djs.send({ // send the error embed via the send function
+            return await scripts_djs.send({ // send the error embed via the send function
               trigger,
               triggerType: scripts_djs.getTriggerType(failed),
               triggerUser: trigger?.user,
@@ -129,16 +160,13 @@ async function setCommandStyle(style, type, trigger, prefix) {
               failed
             })
 
-            failed = r?.failed || failed;
-            deferred = failed ? false : deferred;
-            trigger = r?.trigger || trigger;
-
           } catch (error) {
             console.log(
               error,
               `Failed Negative Command Style Selection Message Attempt`
             );
           }
+        }
       }
 
       // send success embed to the interaction user
@@ -167,6 +195,7 @@ async function setCommandStyle(style, type, trigger, prefix) {
           `Failed Positive Command Style Selection Message Attempt`
         );
       }
+
     } else if (style === "prefix") {
       // set the command style to prefix
       guildObject.commandStyle = "prefix";
@@ -185,10 +214,6 @@ async function setCommandStyle(style, type, trigger, prefix) {
           title: `${djsEmojis.crossmark} **Unable to Select Command Style**`,
           description: `> I was unable to select the command style for some reason.\n> \`\`\`js\n${error}\n\`\`\``,
           color: scripts.getErrorColor(),
-          footer: {
-            text: client.user.displayName,
-            iconURL: client.user.displayAvatarURL(),
-          },
         });
         try {
           return await scripts_djs.send({ // send the error embed via the send function
@@ -219,26 +244,29 @@ async function setCommandStyle(style, type, trigger, prefix) {
           description: `> I was unable to disable slash commands for some reason.\n> \`\`\`js\n${error}\n\`\`\``,
           color: scripts.getErrorColor(),
         });
+
         try {
-         let r = await scripts_djs.send({ // send the error embed via the send function
-            trigger,
-            triggerType: scripts_djs.getTriggerType(failed),
-            triggerUser: trigger?.user,
-            messageObject: {embeds: [errEmbed]},
-            deferred,
-            failed
-          })
+          let r = await scripts_djs.send({ // send the error embed via the send function
+              trigger,
+              triggerType: scripts_djs.getTriggerType(failed),
+              triggerUser: trigger?.user,
+              messageObject: {embeds: [errEmbed]},
+              deferred,
+              failed
+            })
           failed = r?.failed || failed;
           deferred = failed ? false : deferred;
           trigger = r?.trigger || trigger;
 
-        } catch (error) {
+        } catch
+        (error) {
           console.log(
             error,
             `Failed Negative Command Style Selection Message Attempt`
           );
         }
       }
+
 
       // send success embed to the interaction user
       const successEmbed = createEmbed({
@@ -251,7 +279,7 @@ async function setCommandStyle(style, type, trigger, prefix) {
         color: scripts.getSuccessColor(),
       });
       try {
-        return await scripts_djs.send({ // send the success embed via the send function 
+        return await scripts_djs.send({ // send the success embed via the send function
           trigger,
           triggerType: scripts_djs.getTriggerType(failed),
           triggerUser: trigger?.user,
@@ -266,6 +294,7 @@ async function setCommandStyle(style, type, trigger, prefix) {
           `Failed Positive Command Style Selection Message Attempt`
         );
       }
+
     } else if (style === "both") {
       // set the command style to both
       guildObject.commandStyle = "both";
@@ -284,13 +313,9 @@ async function setCommandStyle(style, type, trigger, prefix) {
           title: `${djsEmojis.crossmark} **Unable to Select Command Style**`,
           description: `> I was unable to select the command style for some reason.\n> \`\`\`js\n${error}\n\`\`\``,
           color: scripts.getErrorColor(),
-          footer: {
-            text: client.user.displayName,
-            iconURL: client.user.displayAvatarURL(),
-          },
         });
         try {
-          return await scripts_djs.send({ // send the error embed via the send function 
+          return await scripts_djs.send({ // send the error embed via the send function
             trigger,
             triggerType: scripts_djs.getTriggerType(failed),
             triggerUser: trigger?.user,
@@ -325,18 +350,19 @@ async function setCommandStyle(style, type, trigger, prefix) {
             color: scripts.getErrorColor(),
           });
           try {
-            let r = await scripts_djs.send({ // send the error embed via the send function 
+            let r = await scripts_djs.send({ // send the error embed via the send function
                 trigger,
                 triggerType: scripts_djs.getTriggerType(failed),
                 triggerUser: trigger?.user,
-                messageObject: {embeds: [errEmbed]},
+                messageObject: {
+                  embeds: [errEmbed],
+                },
                 deferred,
-                failed
-              })
+                failed,
+              });
             failed = r?.failed || failed;
             deferred = failed ? false : deferred;
             trigger = r?.trigger || trigger;
-
           } catch (error) {
             console.log(
               error,
@@ -344,10 +370,11 @@ async function setCommandStyle(style, type, trigger, prefix) {
             );
           }
         }
-      }
+
 
       // send success embed to the interaction user
       const successEmbed = createEmbed({
+
             footer: {
               text: client.user.displayName,
               iconURL: client.user.displayAvatarURL(),
@@ -374,8 +401,8 @@ async function setCommandStyle(style, type, trigger, prefix) {
       }
     }
   }
-
 }
+
   // check if the type is prefix
   if (type === "prefix") {
     // trigger is the message object
