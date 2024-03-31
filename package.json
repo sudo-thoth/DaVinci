@@ -4,7 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npm run start"
+    "test": "npm run start",
+    "start": "nodemon ./src/djs/index.js",
+    "online": "node ./src/djs/index.js",
+    "bot": "pm2 start ./src/djs/index.js --watch --name DaVinci --node-args '--max-old-space-size=1024'",
+    "pm2-list": "pm2 list",
+    "pm2-stop": "pm2 stop DaVinci",
+    "show-logs": "pm2 logs DaVinci",
+    "toggle-logs": "pm2 trigger DaVinci toggleLogs",
+    "install-dependencies": "npm install --force"
   },
   "author": "",
   "license": "ISC",
