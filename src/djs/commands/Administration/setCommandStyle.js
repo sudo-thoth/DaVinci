@@ -7,7 +7,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("set-command-style")
     .setDescription("Choose command style to activate, slash, prefix or both.")
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addStringOption((option) =>
       option
         .setName("style")
@@ -53,7 +53,7 @@ module.exports = {
     "prefix: The prefix to use for prefix commands. Only required if style is prefix or both.",
   ],
   prefix_example: ",setCommandStyle prefix !",
-  permissions: ["Administrator"],
+  permissions: ["ManageGuild"],
   async execute(interaction) {
     const { options } = interaction;
     const style = options.getString("style");

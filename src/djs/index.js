@@ -34,23 +34,62 @@ const handleFunctions = require("./client/handlers/handleFunctions");
 const handleEvents = require("./client/handlers/handleEvents");
 const handleCommands = require("./client/handlers/handleCommands");
 
+
+// Get environment variables
+const { token, MongoDB_Token_DaVinci, MEGA_EMAIL, MEGA_PASSWORD, DJS_FUNCTION_FOLDERS_MAC_PATH, DJS_COMMAND_FOLDERS_MAC_PATH, DJS_EVENT_FILES_MAC_PATH, DJS_FUNCTION_FOLDERS_WIN_PATH, DJS_COMMAND_FOLDERS_WIN_PATH, DJS_EVENT_FILES_WIN_PATH } = process.env;
+
+
+// Import folder paths for Discord.js functions, commands, and events
+// Mac Paths
+const djsFunctionFolders_MAC_PATH = DJS_FUNCTION_FOLDERS_MAC_PATH || "./src/djs/functions";
+const djsCommandFolders_MAC_PATH = DJS_COMMAND_FOLDERS_MAC_PATH || "./src/djs/commands";
+const djsEventFiles_MAC_PATH = DJS_EVENT_FILES_MAC_PATH || "./src/djs/client/events";
+// Windows Paths
+const djsFunctionFolders_WIN_PATH = DJS_FUNCTION_FOLDERS_WIN_PATH || ".\\src\\djs\\functions";
+const djsCommandFolders_WIN_PATH = DJS_COMMAND_FOLDERS_WIN_PATH || ".\\src\\djs\\commands";
+const djsEventFiles_WIN_PATH = DJS_EVENT_FILES_WIN_PATH || ".\\src\\djs\\client\\events";
+
+
+
 // Create a collection for databases
 let dbs = new Collection();
 
 // Define folder paths for Discord.js functions, commands, events, and MongoDB configuration
-const djsFunctionFolders = fs.readdirSync("./src/djs/functions");
-const djsCommandFolders = fs.readdirSync("./src/djs/commands/");
-const djsEventFiles = fs
-  .readdirSync("./src/djs/client/events/")
-  .filter((file) => file.endsWith(".js"));
+
+let djsFunctionFoldersTemp;
+let djsCommandFoldersTemp;
+let djsEventFilesTemp;
+
+// check to see if its being run on a windows or mac machine
+// if its a mac machine
+if (process.platform === "darwin") {
+
+  djsFunctionFoldersTemp = fs.readdirSync(djsFunctionFolders_MAC_PATH);
+  djsCommandFoldersTemp = fs.readdirSync(djsCommandFolders_MAC_PATH);
+  djsEventFilesTemp = fs
+    .readdirSync(djsEventFiles_MAC_PATH)
+    .filter((file) => file.endsWith(".js"));
+
+// if its a windows machine
+} else if (process.platform === "win32") {
+
+  djsFunctionFoldersTemp = fs.readdirSync(djsFunctionFolders_WIN_PATH);
+  djsCommandFoldersTemp = fs.readdirSync(djsCommandFolders_WIN_PATH);
+  djsEventFilesTemp = fs
+    .readdirSync(djsEventFiles_WIN_PATH)
+    .filter((file) => file.endsWith(".js"));
+}
+
+const djsFunctionFolders = djsFunctionFoldersTemp;
+const djsCommandFolders = djsCommandFoldersTemp;
+const djsEventFiles = djsEventFilesTemp;
 
 // Import necessary scripts and configurations
 const mongoConfig = fs.readdirSync("./src/MongoDB/db/config/");
 const { login_mongodb } = require("./functions/ready/login_mongodb.js");
 const { login_mega } = require("./functions/ready/login_mega.js");
 
-// Get environment variables
-const { token, MongoDB_Token_DaVinci, MEGA_EMAIL, MEGA_PASSWORD } = process.env;
+
 
 // Define the client's email and password for Mega
 const mega_email = `${MEGA_EMAIL}`;

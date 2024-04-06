@@ -743,7 +743,7 @@ async function setCommandStyle(style, type, trigger, prefix) {
               iconURL: client.user.displayAvatarURL(),
             },
             title: `${djsEmojis.checkmark} **Command Style Set to Both**`,
-        description: `> The command style has been set to \`both command styles\` for this server.\n> Current Prefix: \`${prefix}\``,
+        description: `> The command style has been set to \`both command styles (slash commands & prefix work)\` for this server.\n> Current Prefix: \`${prefix}\``,
         color: scripts.getSuccessColor(),
       });
       try {

@@ -58,11 +58,6 @@ module.exports = async (client, commandFolders, path) => {
           // setup "END PREFIX MODE" command
           const activateSlashCommandsCommand = require(`../../commands/Moderation/activateSlashCommands.js`);
 
-         // clone old client.commands
-          const oldCommandsCollection = client.commands.clone();
-          // place client.commandArray in a temporary variable
-          const oldCommandArray = client.commandArray;
-
           // clear client.commands and client.commandArray
           client.commands.clear();
           client.commandArray = [];
@@ -76,11 +71,6 @@ module.exports = async (client, commandFolders, path) => {
               body: client.commandArray,
             }
           );
-
-          // restore old client.commands and client.commandArray
-          client.commands = oldCommandsCollection.clone();
-          client.commandArray = oldCommandArray;
-
         }
       }
       console.log("Successfully reloaded application (/) commands.");
