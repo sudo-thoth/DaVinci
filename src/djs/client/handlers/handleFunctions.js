@@ -4,6 +4,9 @@ module.exports = function handleFunctions(functionFolders, path) {
         functionsArray = [];
         // Loop through the folders in the functions directory
         for (folder of functionFolders) {
+            if (folder.includes("DS_Store")) {
+                continue;
+            }
             // Get the files in the folder
             const functionFiles = fs.readdirSync(`${path}/${folder}`).filter(file => file.endsWith('.js'));
             // Loop through the files in the folder
