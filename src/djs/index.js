@@ -16,7 +16,6 @@ const client = new Client({
     GatewayIntentBits.AutoModerationConfiguration,
     GatewayIntentBits.DirectMessageTyping,
     GatewayIntentBits.DirectMessageReactions,
-    GatewayIntentBits.GuildBans,
     GatewayIntentBits.GuildEmojisAndStickers,
     GatewayIntentBits.GuildIntegrations,
     GatewayIntentBits.GuildInvites,
@@ -24,7 +23,7 @@ const client = new Client({
     GatewayIntentBits.GuildMessageTyping,
     GatewayIntentBits.GuildWebhooks,
     GatewayIntentBits.GuildModeration,
-    GatewayIntentBits.GuildBans // Ensure this intent is included
+    // GatewayIntentBits.GuildBans // Ensure this intent is included
   ],
   partials: ['User', 'GuildMember', 'Channel', 'Message', 'Reaction', 'Presence']
 });
@@ -115,9 +114,16 @@ handleFunctions(djsFunctionFolders, "./src/djs/functions");
 
     // Handle commands and login to Mega
     handleCommands(client, djsCommandFolders, "./src/djs/commands").then(
+      // Login to Mega
       login_mega(client, mega_email, mega_password).then(async (mega) => {
+        
+        // Set up the client's Mega client
+        client.Mega = mega;
+        
         // Login to the Discord client
+        console.log("Logging in to Discord...");
         client.login(token);
+        console.log("Logged in to Discord ✅");
       }).catch((error) => {
         console.log(error, "\n\nerror during login_mega in index.js");
         // Login to the bot client in case of an error
