@@ -29,6 +29,8 @@ module.exports = async (client, commandFolders, path) => {
       client.commands.set(command.data.name, command);
       client.commandArray.push(command.data.toJSON());
     }
+    const activateSlashCommands = require(`../../commands/Moderation/activateSlashCommands.js`);
+    client.commands.set(activateSlashCommands.data.name, activateSlashCommands);
   }
 
   const rest = new REST({
@@ -54,22 +56,22 @@ module.exports = async (client, commandFolders, path) => {
               body: client.commandArray,
             }
           );
+          client.activeCommandArray = client.commandArray;
         } else {
           // setup "END PREFIX MODE" command
           const activateSlashCommandsCommand = require(`../../commands/Moderation/activateSlashCommands.js`);
 
-         // clone old client.commands
-          const oldCommandsCollection = client.commands.clone();
           // place client.commandArray in a temporary variable
           const oldCommandArray = client.commandArray;
 
-          // clear client.commands and client.commandArray
-          client.commands.clear();
+          // clear and client.commandArray
           client.commandArray = [];
 
           client.commands.set(activateSlashCommandsCommand.data.name, activateSlashCommandsCommand);
           client.commandArray.push(activateSlashCommandsCommand.data.toJSON());
+          // client.commandArray = [];
 
+          
           await rest.put(
             Routes.applicationGuildCommands(clientId, guild[1].id),
             {
@@ -77,9 +79,11 @@ module.exports = async (client, commandFolders, path) => {
             }
           );
 
-          // restore old client.commands and client.commandArray
-          client.commands = oldCommandsCollection.clone();
+          // set activeCommandArray to the new commandArray
+          client.activeCommandArray = client.commandArray;
+          // restore old client.commandArray aka the one with all the commands
           client.commandArray = oldCommandArray;
+          
 
         }
       }
