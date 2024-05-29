@@ -5,6 +5,7 @@ const slashCommandDisabler = require("../../slashCommandControl/slashCommandDisa
 const slashCommandEnabler = require("../../slashCommandControl/slashCommandEnabler.js");
 const scripts_djs = require("../../scripts/scripts_djs.js");
 const djsEmojis = require("../../scripts/djsEmojis.js");
+const { Routes } = require("discord-api-types/v9");
 
 /**
  * Selects the command style (slash, prefix, or both) for a server.
@@ -138,6 +139,32 @@ async function setCommandStyle(style, type, trigger, prefix) {
       if (currentStyle !== "both") {
         try {
           await slashCommandEnabler(client, trigger.guild);
+                    // check to see if the current commands array has all needed commands
+                    if(client.activeCommandArray?.length >= 0) {
+                      if (!(client.activeCommandArray?.length > 1)) {
+                        // load activate-slashcommands command
+                        try {
+          
+                          // old command will be 1 and only activate
+          
+                          // current client.commandArray will be all commands besides activate slash commands
+          
+                          // I need to register the current commands
+          
+                          await client?.rest.put(
+                            Routes.applicationGuildCommands(client.id, trigger.guild.id),
+                            {
+                              body: client.commandArray,
+                            }
+                          );
+          
+                          // set the activeCommandArray to the current commandArray
+                          client.activeCommandArray = client.commandArray;
+                        } catch (error) {
+                          console.log(error, `Failed to Reset Command Array`);
+                        }
+                      }
+                    }
         } catch (error) {
           console.log(error, `Failed to Enable Slash Commands`);
           // send message to the interaction user stating, was unable to complete the command
@@ -236,6 +263,37 @@ async function setCommandStyle(style, type, trigger, prefix) {
       // trigger slash command disabler
       try {
         await slashCommandDisabler(client, trigger.guild);
+         // load activate-slashcommands command
+ try {
+          
+  // setup "END PREFIX MODE" command
+  const activateSlashCommandsCommand = require(`../../../commands/Moderation/activateSlashCommands.js`);
+
+
+    // clear  and client.commandArray
+  
+    client.commandArray = [];
+  
+  
+    client.commandArray.push(activateSlashCommandsCommand.data.toJSON());
+    // client.commandArray = [];
+  
+    
+    await client?.rest.put(
+      Routes.applicationGuildCommands(client.id, guild[1].id),
+      {
+        body: client.commandArray,
+      }
+    );
+  
+    // restore old client.commandArray
+    let tempArray = client.commandArray;
+    client.commandArray = client.activeCommandArray;
+    client.activeCommandArray = tempArray;
+
+} catch (error) {
+  console.log(error, `Failed to Load Activate Slash Commands Command`);
+}
       } catch (error) {
         console.log(error, `Failed to Disable Slash Commands`);
         // send message to the interaction user stating, was unable to complete the command
@@ -337,6 +395,32 @@ async function setCommandStyle(style, type, trigger, prefix) {
       if (currentStyle !== "slash") {
         try {
           await slashCommandEnabler(client, trigger.guild);
+                    // check to see if the current commands array has all needed commands
+                    if(client.activeCommandArray?.length >= 0) {
+                      if (!(client.activeCommandArray?.length > 1)) {
+                        // load activate-slashcommands command
+                        try {
+          
+                          // old command will be 1 and only activate
+          
+                          // current client.commandArray will be all commands besides activate slash commands
+          
+                          // I need to register the current commands
+          
+                          await client?.rest.put(
+                            Routes.applicationGuildCommands(client.id, trigger.guild.id),
+                            {
+                              body: client.commandArray,
+                            }
+                          );
+          
+                          // set the activeCommandArray to the current commandArray
+                          client.activeCommandArray = client.commandArray;
+                        } catch (error) {
+                          console.log(error, `Failed to Reset Command Array`);
+                        }
+                      }
+                    }
         } catch (error) {
           console.log(error, `Failed to Enable Slash Commands`);
           // send message to the interaction user stating, was unable to complete the command
@@ -505,6 +589,35 @@ async function setCommandStyle(style, type, trigger, prefix) {
       if (currentStyle !== "both") {
         try {
           await slashCommandEnabler(client, trigger.guild); // trigger slash command enabler
+
+          // check to see if the current commands array has all needed commands
+          if(client.activeCommandArray?.length >= 0) {
+            if (!(client.activeCommandArray?.length > 1)) {
+              // load activate-slashcommands command
+              try {
+
+                // old command will be 1 and only activate
+
+                // current client.commandArray will be all commands besides activate slash commands
+
+                // I need to register the current commands
+
+                await client?.rest.put(
+                  Routes.applicationGuildCommands(client.id, trigger.guild.id),
+                  {
+                    body: client.commandArray,
+                  }
+                );
+
+                // set the activeCommandArray to the current commandArray
+                client.activeCommandArray = client.commandArray;
+              } catch (error) {
+                console.log(error, `Failed to Reset Command Array`);
+              }
+            }
+          }
+         
+          
         } catch (error) {
           console.log(error, `Failed to Enable Slash Commands`);
           // send message to the interaction user stating, was unable to complete the command
@@ -605,6 +718,37 @@ async function setCommandStyle(style, type, trigger, prefix) {
       // trigger slash command disabler
       try {
         await slashCommandDisabler(client, trigger.guild);
+ // load activate-slashcommands command
+ try {
+          
+  // setup "END PREFIX MODE" command
+  const activateSlashCommandsCommand = require(`../../../commands/Moderation/activateSlashCommands.js`);
+
+
+  // clear  and client.commandArray
+
+  client.commandArray = [];
+
+
+  client.commandArray.push(activateSlashCommandsCommand.data.toJSON());
+  // client.commandArray = [];
+
+  
+  await client?.rest.put(
+    Routes.applicationGuildCommands(client.id, guild[1].id),
+    {
+      body: client.commandArray,
+    }
+  );
+
+  // restore old client.commandArray
+  let tempArray = client.commandArray;
+  client.commandArray = client.activeCommandArray;
+  client.activeCommandArray = tempArray;
+
+} catch (error) {
+  console.log(error, `Failed to Load Activate Slash Commands Command`);
+}
       } catch (error) {
         console.log(error, `Failed to Disable Slash Commands`);
         // send message to the interaction user stating, was unable to complete the command
@@ -703,6 +847,32 @@ async function setCommandStyle(style, type, trigger, prefix) {
       if (currentStyle !== "slash") {
         try {
           await slashCommandEnabler(client, trigger.guild);
+                    // check to see if the current commands array has all needed commands
+                    if(client.activeCommandArray?.length >= 0) {
+                      if (!(client.activeCommandArray?.length > 1)) {
+                        // load activate-slashcommands command
+                        try {
+          
+                          // old command will be 1 and only activate
+          
+                          // current client.commandArray will be all commands besides activate slash commands
+          
+                          // I need to register the current commands
+          
+                          await client?.rest.put(
+                            Routes.applicationGuildCommands(client.id, trigger.guild.id),
+                            {
+                              body: client.commandArray,
+                            }
+                          );
+          
+                          // set the activeCommandArray to the current commandArray
+                          client.activeCommandArray = client.commandArray;
+                        } catch (error) {
+                          console.log(error, `Failed to Reset Command Array`);
+                        }
+                      }
+                    }
         } catch (error) {
           console.log(error, `Failed to Enable Slash Commands`);
           // send message to the interaction user stating, was unable to complete the command
