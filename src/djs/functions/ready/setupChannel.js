@@ -1,5 +1,6 @@
 const client = require("../../index.js");
 const mongoose = require("mongoose");
+const getChannel = require("./getChannel.js");
 
 /**
  * Sets up a channel in the database.
@@ -16,7 +17,7 @@ async function setupChannel(channel){
 
   try {
     // get the data object for the channel from the database
-    data = await client.getChannel(channel);
+    data = await client.getChannel(channel) || getChannel(channel);
   } catch (error) {
     console.log(
       `An error occurred while trying to get the data from the database: ${error}`
