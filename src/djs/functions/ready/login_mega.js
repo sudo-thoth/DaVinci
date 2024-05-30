@@ -47,6 +47,7 @@ async function login_mega(
   email = mega_email,
   password = mega_password
 ) {
+  console.log("Logging into Mega...")
   try {
     // Create a new Mega.nz account object & autologin
     const mega = new Storage({ email: email, password: password, autologin: false });
