@@ -13,6 +13,13 @@ module.exports = {
     try {
       // run the setupOnReady function to set up the bot
       console.log("Running Setup 🦾");
+      // reset client commands
+      try{
+        client.application.commands.set([]);
+      } catch(error){
+        console.error(`Error while trying to reset client commands: ${error}`);
+      }
+      
       await setupOnReady(client);
     } catch (error) {
       console.log(error);

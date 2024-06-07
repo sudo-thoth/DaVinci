@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const createEmbed = require("../../functions/create/createEmbed.js");
-const setCommandStyle = require("../../functions/commands/Administration/setCommandStyle.js");
 const scripts = require("../../functions/scripts/scripts.js");
+const { activateSlashCommands } = require("../../functions/prefixCommandHandling/commandCenter.js");
 
 
 module.exports = {
@@ -14,6 +14,12 @@ module.exports = {
     "activate-slashcommands",
     "activate-slashcommand",
     "activate-slash",
+    "activate-slash-commands",
+    "activateslashcommands",
+    "slashcommandson",
+    "slashcommands",
+    "slashcommand",
+
     "slashcommands-activate",
     "slashcommands-on",
     "slashcommands-enable",
@@ -37,8 +43,44 @@ module.exports = {
   
     // call the command style selection function
     try {
+      // defer the reply to the interaction
+      try {
+        await interaction.deferReply();
+        deferred = true;
+    } catch (error) {
+
+        const errEmbed = createEmbed({
+            title: `Unable to Activate Slash Commands`,
+            description: `${djsEmojis.crossmark} I was unable to defer the reply to the interaction from ${trigger?.user || "*Unknown*"}.`,
+            color: scripts.getErrorColor(),
+            footer: {
+                text: client.user.displayName,
+                iconURL: client.user.displayAvatarURL()
+            }
+          });
+
+        try {
+             let r = await scripts_djs.send({ // send an error message using an error message function
+                trigger,
+                triggerType: scripts_djs.getTriggerType(failed),
+                triggerUser: trigger?.user,
+                messageObject: { embeds: [errEmbed] },
+                deferred,
+                failed
+                });
+                failed = r?.failed || failed;
+  deferred = failed ? false : deferred;
+  trigger = r?.trigger || trigger;
+                return;
+
+                
+        } catch (error) {
+            console.log(error, `Failed Negative Ban Message Attempt`);
+        }
+
+    }
       // call the command function
-      return await setCommandStyle("both", "prefix", interaction);
+      return await activateSlashCommands("both", "prefix", interaction, interaction.client.localDB[interaction.guild.name].prefix);
     } catch (error) {
       console.log(error, `Activate Slash Commands Request Failed`);
       // send error embed to the interaction user

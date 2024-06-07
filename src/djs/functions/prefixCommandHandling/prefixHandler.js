@@ -169,8 +169,49 @@ async function prefixHandler(message, text) {
     return;
   }
 
+  let userPermissions, userHasPermissions;
   // command functions switch case tree
   switch (commandName) {
+
+    
+    // activate slash commands Command
+    case "activate-slashcommands":
+
+      // Check the user for the permissions needed based on the permissions array.
+      userPermissions = message.member.permissions.toArray();
+
+      userHasPermissions = await permissionsCheck(
+        userPermissions,
+        permissions,
+        message
+      );
+      if (!userHasPermissions) {
+        return;
+      }
+      if (commandArgs?.length === 0) {
+        try {
+          // call the setCommandStyle function
+          return await commandCenter.setCommandStyle(
+            "both",
+            "prefix",
+            message
+          );
+        } catch (error) {
+          console.log(error, `Failed Command Style Set Attempt`);
+          // Send error embed to the interaction user.
+          try {
+            return await sendErrorEmbed(message, error, commandName);
+          } catch (error) {
+            console.log(error, `Failed Error Embed Send Attempt`);
+          }
+        }
+
+        return;
+      }
+      break;
+
+    
+    
     // set-command-style Command
 
     case "set-command-style":
@@ -200,9 +241,9 @@ async function prefixHandler(message, text) {
       }
 
       // Check the user for the permissions needed based on the permissions array.
-      const userPermissions = message.member.permissions.toArray();
+      userPermissions = message.member.permissions.toArray();
 
-      const userHasPermissions = await permissionsCheck(
+      userHasPermissions = await permissionsCheck(
         userPermissions,
         permissions,
         message
